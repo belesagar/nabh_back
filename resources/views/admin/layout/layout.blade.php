@@ -1,0 +1,5 @@
+@include('admin.layout.header')
+@section('title', '{{title}}')
+@include('admin.layout.sidebar')
+@yield('content')
+@include('admin.layout.footer')
