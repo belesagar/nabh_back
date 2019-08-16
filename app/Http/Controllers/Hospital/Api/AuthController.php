@@ -117,7 +117,7 @@ class AuthController extends Controller
     {
         auth('hospital_api')->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(["success" => true,"error_code"=>0,'info' => 'Successfully logged out']);
     }
 
     /**
