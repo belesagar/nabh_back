@@ -19,44 +19,47 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::group(['middleware' => ['Cors']], function () {
 	Route::namespace('Admin\Api')->group(function () {
-		Route::group(['middleware' => ['jwt.verify']], function () {
-			Route::post('checkadminlogin', 'AuthController@me');
+		Route::prefix('admin')->group(function () {
+			
+			Route::group(['middleware' => ['jwt.verify']], function () {
+				Route::post('checkadminlogin', 'AuthController@me');
+			});
+
+				//Login Apis
+				Route::post('getlogindata','AuthController@get_admin_login_data')->name('getlogindata'); 
+				Route::post('forgot_password','AuthController@get_forgot_password_data')->name('forgot_password'); 
+				Route::get('logout','AuthController@logout')->name('logout'); 
+
+				//User List
+				Route::get('userlist', 'UserController@userList');
+				Route::post('getuserinfo', 'UserController@getUserInfo');
+				Route::post('adduserdata', 'UserController@addUserData');
+				Route::post('updateuserdata', 'UserController@updateUserData');
+
+				//Offer Api
+				Route::get('offerlist', 'OfferController@offerList');
+				Route::post('addoffer', 'OfferController@addOffer');
+				Route::post('updateoffer', 'OfferController@updateOffer');
+				Route::post('getofferinfo', 'OfferController@getOfferInfo');
+
+				//NABH Indicators
+				Route::get('indicatorslist', 'NabhIndicatorsController@indicatorsList');
+				Route::post('addindicators', 'NabhIndicatorsController@addIndicators');
+				Route::post('updateindicators', 'NabhIndicatorsController@updateIndicators');
+				Route::post('getindicatorsinfo', 'NabhIndicatorsController@getIndicatorsInfo');
+
+				//NABH Group
+				Route::get('nabhgrouplist', 'NabhGroupController@nabhGroupList');
+				Route::post('addnabhgroup', 'NabhGroupController@addNabhGroup');
+				Route::post('updatenabhgroup', 'NabhGroupController@updateNabhGroup');
+
+				//Hospital Registration
+				Route::get('indicatorslist', 'HospitalRegistrationController@hospitalList');
+				Route::post('addhospital', 'HospitalRegistrationController@getHospitalInfo');
+				Route::post('updatehospital', 'HospitalRegistrationController@addHospitalData');
+				Route::post('gethospitalinfo', 'HospitalRegistrationController@updateHospitalData');
+
 		});
-
-			//Login Apis
-			Route::post('getlogindata','AuthController@get_admin_login_data')->name('getlogindata'); 
-			Route::post('forgot_password','AuthController@get_forgot_password_data')->name('forgot_password'); 
-
-			//User List
-			Route::post('userlist', 'UserController@userList');
-			Route::post('getuserinfo', 'UserController@getUserInfo');
-			Route::post('adduserdata', 'UserController@addUserData');
-			Route::post('updateuserdata', 'UserController@updateUserData');
-
-			//Offer Api
-			Route::get('offerlist', 'OfferController@offerList');
-			Route::post('addoffer', 'OfferController@addOffer');
-			Route::post('updateoffer', 'OfferController@updateOffer');
-			Route::post('getofferinfo', 'OfferController@getOfferInfo');
-
-			//NABH Indicators
-			Route::get('indicatorslist', 'NabhIndicatorsController@indicatorsList');
-			Route::post('addindicators', 'NabhIndicatorsController@addIndicators');
-			Route::post('updateindicators', 'NabhIndicatorsController@updateIndicators');
-			Route::post('getindicatorsinfo', 'NabhIndicatorsController@getIndicatorsInfo');
-
-			//NABH Group
-			Route::get('nabhgrouplist', 'NabhGroupController@nabhGroupList');
-			Route::post('addnabhgroup', 'NabhGroupController@addNabhGroup');
-			Route::post('updatenabhgroup', 'NabhGroupController@updateNabhGroup');
-
-			//Hospital Registration
-			Route::get('indicatorslist', 'HospitalRegistrationController@hospitalList');
-			Route::post('addhospital', 'HospitalRegistrationController@getHospitalInfo');
-			Route::post('updatehospital', 'HospitalRegistrationController@addHospitalData');
-			Route::post('gethospitalinfo', 'HospitalRegistrationController@updateHospitalData');
-
-		
 		
 		
 	});
@@ -64,15 +67,21 @@ Route::group(['middleware' => ['Cors']], function () {
 
 	//This  api for hospital
 	Route::namespace('Hospital\Api')->group(function () {
-		Route::group(['middleware' => ['jwt.hospital.verify']], function () {
-			Route::post('checkhospitallogin', 'AuthController@me');
+		Route::prefix('hospital')->group(function () {
+			
+			Route::group(['middleware' => ['jwt.hospital.verify']], function () {
+				Route::post('checkhospitallogin', 'AuthController@me');
+			});
+
+			//Login Apis
+			Route::post('gethospitallogindata','AuthController@get_login_data')->name('gethospitallogindata'); 
+			Route::post('hospital_forgot_password','AuthController@get_forgot_password_data')->name('hospital_forgot_password');
+
+			Route::get('logout','AuthController@logout')->name('logout'); 
+
+
+			Route::post('registration', 'HospitalRegistrationController@addHospitalData');
 		});
-
-		//Login Apis
-		Route::post('gethospitallogindata','AuthController@get_login_data')->name('gethospitallogindata'); 
-		Route::post('hospital_forgot_password','AuthController@get_forgot_password_data')->name('hospital_forgot_password');
-		Route::post('hospital/registration', 'HospitalRegistrationController@addHospitalData');
-
 	});
 
 });
