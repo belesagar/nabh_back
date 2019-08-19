@@ -17,7 +17,7 @@ class CreateNabhGroupTable extends Migration
             $table->bigIncrements('nabh_group_id');
             $table->string('nabh_name',50);
             $table->float('price',10,2);
-            // $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
 

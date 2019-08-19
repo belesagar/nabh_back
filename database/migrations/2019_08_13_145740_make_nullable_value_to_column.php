@@ -24,7 +24,7 @@ class MakeNullableValueToColumn extends Migration
 
         Schema::table('admin_users', function (Blueprint $table) {
              $table->string('reset_id', 50)->nullable()->change();
-             $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+             // $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
         });
 
         Schema::table('nabh_indicators', function (Blueprint $table) {

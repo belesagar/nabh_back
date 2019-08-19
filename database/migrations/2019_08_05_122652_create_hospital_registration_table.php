@@ -30,8 +30,8 @@ class CreateHospitalRegistrationTable extends Migration
             $table->string('offer_code');
             $table->float('offer_amount',10,2);
             $table->float('total_amount',10,2);
-            // $table->enum('payment_status', ['PENDING', 'SUCCESS','CANCELLED'])->default('PENDING');
-            // $table->enum('status', ['ACTIVE', 'INACTIVE','SUSPENDED'])->default('ACTIVE');
+            $table->enum('payment_status', ['PENDING', 'SUCCESS','CANCELLED'])->default('PENDING');
+            $table->enum('status', ['ACTIVE', 'INACTIVE','SUSPENDED'])->default('ACTIVE');
             $table->integer('created_by');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
