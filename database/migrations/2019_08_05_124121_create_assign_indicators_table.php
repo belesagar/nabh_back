@@ -17,10 +17,10 @@ class CreateAssignIndicatorsTable extends Migration
             $table->bigIncrements('assign_indicator_id');
             $table->integer('hospital_id');
             $table->integer('indicators_id');
-            // $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
-        });
+        }); 
     }
 
     /**

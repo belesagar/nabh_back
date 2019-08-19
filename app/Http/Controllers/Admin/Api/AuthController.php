@@ -51,7 +51,7 @@ class AuthController extends Controller
 
      //    return $this->respondWithToken($token);
 
-    	// $data = array("name"=>"sagar","lname"=>"bele");
+    	// $data = array("name"=>"sagar","lname"=>"bele"); sds
 
     	// $payload = JWTFactory::make($data);
      //        $token = JWTAuth::encode($payload); 

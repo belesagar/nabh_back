@@ -22,7 +22,7 @@ class CreateAdminUsersTable extends Migration
             $table->string('password');
             $table->string('mobile',15);
             $table->integer('role');
-            // $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->integer('created_by');
             $table->timestamps();
         });
