@@ -17,7 +17,7 @@ class UserController extends Controller
     }
 
     public function userList(Request $request) {
-        $list = $this->admin_user->all()->toArray();
+        $list = $this->admin_user->with('role')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
         return json_encode($return);

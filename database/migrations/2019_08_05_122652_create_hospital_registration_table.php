@@ -15,11 +15,11 @@ class CreateHospitalRegistrationTable extends Migration
     {
         Schema::create('hospital_registration', function (Blueprint $table) {
             $table->bigIncrements('hospital_id');
-            $table->string('hospital_unique_id')->unique();
+            $table->string('hospital_unique_id',50)->unique();
             $table->string('hospital_name');
             $table->string('spoc_name');
             $table->string('spoc_designation');
-            $table->string('email')->unique();
+            $table->string('email',100)->unique();
             $table->string('mobile',15);
             $table->string('password',15);
             $table->string('city',40);
