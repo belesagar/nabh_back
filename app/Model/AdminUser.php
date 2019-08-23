@@ -13,6 +13,11 @@ class AdminUser extends Authenticatable implements JWTSubject
 
     protected $fillable = ['name','email','password','mobile','role','status','created_by'];
 
+    public function role()
+    {
+        return $this->belongsTo('App\Model\Role','role','role_id');
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

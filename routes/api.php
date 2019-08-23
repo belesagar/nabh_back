@@ -54,7 +54,7 @@ Route::group(['middleware' => ['Cors']], function () {
 				Route::post('updatenabhgroup', 'NabhGroupController@updateNabhGroup');
 
 				//Hospital Registration
-				Route::get('indicatorslist', 'HospitalRegistrationController@hospitalList');
+				Route::get('hospitallist', 'HospitalRegistrationController@hospitalList');
 				Route::post('addhospital', 'HospitalRegistrationController@getHospitalInfo');
 				Route::post('updatehospital', 'HospitalRegistrationController@addHospitalData');
 				Route::post('gethospitalinfo', 'HospitalRegistrationController@updateHospitalData');
@@ -79,8 +79,10 @@ Route::group(['middleware' => ['Cors']], function () {
 
 			Route::get('logout','AuthController@logout')->name('logout'); 
 
-
 			Route::post('registration', 'HospitalRegistrationController@addHospitalData');
+
+			Route::get('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
+
 		});
 	});
 
