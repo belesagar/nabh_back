@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIndicatorsHistory extends Migration
+class CreateHospitalUsersIndicatorsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateIndicatorsHistory extends Migration
      */
     public function up()
     {
-        Schema::create('indicators_data_history', function (Blueprint $table) {
-            $table->bigIncrements('indicators_history_id');
-            $table->integer('hospital_id');
+        Schema::create('hospital_users_indicators', function (Blueprint $table) {
+            $table->bigIncrements('hospital_users_indicators_id');
+            $table->integer('hospital_id')->index();
+            $table->integer('hospital_user_id');
             $table->integer('indicator_id');
-            $table->integer('indicator_data_id');
-            $table->integer('updated_by_id');
-            $table->json('updated_data');
+            $table->enum('status', ['ACTIVE', 'INACTIVE'])->default('ACTIVE');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
@@ -32,6 +31,6 @@ class CreateIndicatorsHistory extends Migration
      */
     public function down()
     {
-        // Schema::dropIfExists('indicators_history');
+        Schema::dropIfExists('hospital_users_indicators');
     }
 }
