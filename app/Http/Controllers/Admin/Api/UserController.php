@@ -39,8 +39,14 @@ class UserController extends Controller
 	    	$request_data = $request->all();
 	        $user_data = $this->admin_user->where('admin_user_id', $request_data['user_id'])
 	                            ->get();
-	        $data = array("user_data" => $user_data);
-	        $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
+            if(count($user_data) == 1)
+            {
+                $data = array("user_data" => $user_data[0]);
+                $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
+            }else{
+                $return = array("success" => false,"error_code"=>1,"info" => "Invalid Record");
+            }
+	        
     	}
         return json_encode($return);
     }
@@ -49,7 +55,8 @@ class UserController extends Controller
         $validator = \Validator::make($request->all(),[
             'name' => 'required',
             'email' => 'required|email|unique:admin_users,email',
-            'password' => 'required',
+            'password' => 'required|same:cpassword',
+            'cpassword' => 'required',
             'mobile' => 'required|numeric',
             'role' => 'required|numeric',
         ]); 
@@ -95,6 +102,7 @@ class UserController extends Controller
             'user_id' => 'required|numeric',
             'name' => 'required',
             'email' => 'required|email',
+            'password' => 'same:cpassword',
             'mobile' => 'required|numeric',
             'role' => 'required|numeric',
         ]); 
@@ -112,7 +120,16 @@ class UserController extends Controller
 	        {
 	        	$check_data = $this->admin_user->select('admin_user_id')->where('email', $request_data['email'])->get();
 	        	
-	        	if(count($check_data) == 0 && $request_data['user_id'] == $check_data[0]['admin_user_id'])
+                $success = 1;
+                if(count($check_data) > 0)
+                {
+                    if($request_data['user_id'] != $check_data[0]['admin_user_id'])
+                    {
+                        $success = 0;
+                    }
+                }
+
+	        	if($success)
 	        	{
 		        	$update_data = array(
 		        		"name" => $request_data['name'],

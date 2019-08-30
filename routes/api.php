@@ -59,6 +59,15 @@ Route::group(['middleware' => ['Cors']], function () {
 				Route::post('updatehospital', 'HospitalRegistrationController@addHospitalData');
 				Route::post('gethospitalinfo', 'HospitalRegistrationController@updateHospitalData');
 
+				//Role Apis
+				Route::get('rolelist', 'RoleController@roleList');
+
+				//Packages
+				Route::get('package/getlist', 'PackageController@List');
+				Route::post('package/adddata', 'PackageController@Add');
+				Route::post('package/editdata', 'PackageController@Edit');
+				Route::post('package/getinfo', 'PackageController@getInfo');
+
 		});
 		
 		
@@ -81,7 +90,25 @@ Route::group(['middleware' => ['Cors']], function () {
 
 			Route::post('registration', 'HospitalRegistrationController@addHospitalData');
 
+			//For adding and updating indicators data
 			Route::get('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
+			Route::post('saveindicatorsdata', 'NabhIndicatorsController@savendicatorsData');
+			Route::get('getindicatorlist', 'NabhIndicatorsController@getIndicatorsList');
+			Route::post('getindicatordata', 'NabhIndicatorsController@getIndicatorData');
+
+			//Indicator List
+			Route::get('indicatorlist', 'NabhIndicatorsController@indicatorsList');
+
+			//Hospital Users
+			Route::get('users/getlist', 'HospitalUsersController@List');
+			Route::post('users/adddata', 'HospitalUsersController@Add');
+			Route::post('users/editdata', 'HospitalUsersController@Edit');
+			Route::post('users/getinfo', 'HospitalUsersController@getInfo');
+			Route::post('users/assignindicators', 'HospitalUsersController@AssignIndicators');
+
+			//Hospital Packages
+			Route::get('packages/getlist', 'HospitalPackagesController@List');
+
 
 		});
 	});
