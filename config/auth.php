@@ -48,7 +48,7 @@ return [
         ],
         'hospital_api' => [
             'driver' => 'jwt',//token
-            'provider' => 'hospital_registration',
+            'provider' => 'hospital_users',
             'hash' => false,
         ],
     ],
@@ -75,9 +75,9 @@ return [
             'driver' => 'eloquent',
             'model' => App\Model\AdminUser::class,
         ],
-        'hospital_registration' => [
+        'hospital_users' => [
             'driver' => 'eloquent',
-            'model' => App\Model\HospitalRegistration::class,
+            'model' => App\Model\HospitalUsers::class,
         ],
 
         // 'users' => [

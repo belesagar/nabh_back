@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Hospital\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalUsers;
+use App\Model\HospitalUsersIndicators;
 
 class HospitalUsersController extends Controller
 {
     public function __construct(Request $request)
     {
         $this->hospital_users = new HospitalUsers();
+        $this->hospital_users_indicators = new HospitalUsersIndicators();
  		$this->payload = auth('hospital_api')->user();
+        $this->hospital_id = $this->payload['hospital_id'];
 
     }
     public function List(Request $request) {
@@ -184,8 +187,60 @@ class HospitalUsersController extends Controller
         return json_encode($return);
     }
 
-    public function AssignIndicators(Request $request) {
-    	
+    public function GetUserAssignIndicators(Request $request,$id) {
+    	$list = $this->hospital_users_indicators->select("indicator_id")->where([['status','ACTIVE'],['hospital_id',$this->hospital_id],['hospital_user_id',$id]])->get()->toArray();
+        $data = array("list" => $list);
+        $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
+        return json_encode($return);
+    }
+
+    public function UserAssignIndicators(Request $request,$id)
+    {
+        $request_data = $request->all();
+        $selected_indicators = [];
+        $check_indicator_selection = true;
+        foreach($request_data as $key => $value)
+        {
+            if($value != "")
+            {
+                $check_indicator_selection = false;
+                $selected_indicators[] = $key;
+            }
+        }
+
+        if($check_indicator_selection)
+        {
+            $return = array("success" => false,"error_code"=>1,"info" => "Please Select the indicators.");
+        }else{
+            $insert_data_array = [];
+            foreach($selected_indicators as $indicators_value)
+            {
+                $check_indicators_availability = $this->hospital_users_indicators->where([['hospital_id',$this->hospital_id],["indicator_id",$indicators_value],['hospital_user_id',$id]])->get();
+                if(count($check_indicators_availability) == 0)
+                {
+                    $insert_data_array[] = array(
+                        "hospital_id" => $this->hospital_id,
+                        "hospital_user_id" => $id,
+                        "indicator_id" => $indicators_value,
+                    );
+                }
+            }
+
+            if(count($insert_data_array) > 0)
+            {
+                $response_id = $this->hospital_users_indicators->insert($insert_data_array);
+                if($response_id > 0)
+                {
+                    $return = array("success" => true,"error_code"=>0,"info" => "Indicators Applied Successfully.");
+                }else{
+                    $return = array("success" => false,"error_code"=>1,"info" => "Something is wrong, Please try again.");
+                }
+            }else{
+                $return = array("success" => true,"error_code"=>0,"info" => "Indicators Applied Successfully.");
+            }
+
+        }
+        return json_encode($return);
     }
 
 }
