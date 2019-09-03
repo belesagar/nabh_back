@@ -104,10 +104,16 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('users/adddata', 'HospitalUsersController@Add');
 			Route::post('users/editdata', 'HospitalUsersController@Edit');
 			Route::post('users/getinfo', 'HospitalUsersController@getInfo');
-			Route::post('users/assignindicators', 'HospitalUsersController@AssignIndicators');
+			Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
+			Route::match(['get', 'post'],'user/permission/{id}', 'HospitalUsersController@UserAssignIndicators');
 
 			//Hospital Packages
 			Route::get('packages/getlist', 'HospitalPackagesController@List');
+
+			//Assign Indicators
+			Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators');
+			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
+			
 
 
 		});

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Hospital\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalRegistration;
+use App\Model\HospitalUsers;
 use JWTFactory;
 use JWTAuth;
 
@@ -13,6 +14,7 @@ class AuthController extends Controller
     public function __construct(Request $request)
     {
         $this->hospiatl_registration = new HospitalRegistration();
+        $this->hospiatl_users = new HospitalUsers();
     }
 
     public function get_login_data(Request $request) {
@@ -78,16 +80,30 @@ class AuthController extends Controller
         $return = array("success" => false,"error_code"=>1,"info" => $errors_message);
         }else{
             $request_data = $request->all();
-            $user_data = $this->hospiatl_registration->where('status', 'ACTIVE')
+            $user_data = $this->hospiatl_users->where('status', 'ACTIVE')
                             ->where('email', $request_data['email'])
                             ->where('password', md5($request_data['password']))
                             ->get();
             
             if(count($user_data) > 0)
             {
-                $token = auth('hospital_api')->login($user_data[0]);
-				$data = array("token" => $token);
-                $return = array("success" => true,"error_code"=>0,"info" => "Login Successfull","data" => $data);
+                $hospital_data = $this->hospiatl_registration->select('hospital_unique_id','hospital_name')->where('status', 'ACTIVE')
+                            ->where('hospital_id', $user_data[0]['hospital_id'])
+                            ->get();
+                if(count($hospital_data) == 1)
+                {
+                    $token_data = $user_data[0];
+
+                    $token_data['hospital_unique_id'] = $hospital_data[0]['hospital_unique_id'];
+                    $token_data['hospital_name'] = $hospital_data[0]['hospital_name'];
+                    
+                    $token = auth('hospital_api')->login($token_data);
+    				$data = array("token" => $token);
+                    $return = array("success" => true,"error_code"=>0,"info" => "Login Successfull","data" => $data);
+                }else{
+                
+                    $return = array("success" => false,"error_code"=>1,"info" => "Invalid Credentials");
+                }
             }else{
                 
                 $return = array("success" => false,"error_code"=>1,"info" => "Invalid Credentials");

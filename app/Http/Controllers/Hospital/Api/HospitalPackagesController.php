@@ -21,4 +21,7 @@ class HospitalPackagesController extends Controller
         $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
         return json_encode($return);
     }
+
+    
+
 }
