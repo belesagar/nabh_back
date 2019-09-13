@@ -48,6 +48,12 @@ Route::group(['middleware' => ['Cors']], function () {
 				Route::post('updateindicators', 'NabhIndicatorsController@updateIndicators');
 				Route::post('getindicatorsinfo', 'NabhIndicatorsController@getIndicatorsInfo');
 
+				//Nabh Form data
+				Route::get('form/list', 'NabhIndicatorsController@formList');
+				Route::post('formdata/add', 'NabhIndicatorsController@addFormData');
+				Route::post('getformdata', 'NabhIndicatorsController@getformInfo');
+				Route::post('update/formdata', 'NabhIndicatorsController@updateFormData');
+
 				//NABH Group
 				Route::get('nabhgrouplist', 'NabhGroupController@nabhGroupList');
 				Route::post('addnabhgroup', 'NabhGroupController@addNabhGroup');
@@ -91,7 +97,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('registration', 'HospitalRegistrationController@addHospitalData');
 
 			//For adding and updating indicators data
-			Route::get('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
+			Route::post('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
 			Route::post('saveindicatorsdata', 'NabhIndicatorsController@savendicatorsData');
 			Route::get('getindicatorlist', 'NabhIndicatorsController@getIndicatorsList');
 			Route::post('getindicatordata', 'NabhIndicatorsController@getIndicatorData');
@@ -114,6 +120,15 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators');
 			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
 			
+			//Doctors Route
+			Route::get('doctors/getlist', 'DoctorsController@List');
+			Route::post('doctor/adddata', 'DoctorsController@Add');
+			Route::post('doctor/editdata', 'DoctorsController@Edit');
+			Route::post('doctor/getinfo', 'DoctorsController@getInfo');
+			Route::get('doctors/type/getlist', 'DoctorsController@typeList');
+
+			//OT Route
+			Route::get('ot/getlist', 'OtController@List');
 
 
 		});

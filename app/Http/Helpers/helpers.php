@@ -190,4 +190,13 @@ class Helpers {
 
     }
 
+    public static function convertKeyValuePair(Array $data,$key_name = "",$key_value = "") {
+        $pair_array = [];
+        foreach ($data as $key => $value) {
+            $pair_array[$value[$key_name]] = $value[$key_value];
+        }
+
+        return $pair_array;
+    }
+
 }

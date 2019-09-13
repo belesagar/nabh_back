@@ -18,7 +18,7 @@ class HospitalUsersController extends Controller
 
     }
     public function List(Request $request) {
-    	$list = $this->hospital_users->where("hospital_id",$this->payload['hospital_id'])->get()->toArray();
+    	$list = $this->hospital_users->where("hospital_id",$this->payload['hospital_id'])->orderBy('created_at', 'desc')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
         return json_encode($return);
