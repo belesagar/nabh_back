@@ -16,7 +16,7 @@ class HospitalRegistrationController extends Controller
     }
 
     public function hospitalList(Request $request) {
-        $list = $this->hospital_registration->all()->toArray();
+        $list = $this->hospital_registration->orderBy('created_at', 'desc')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
         return json_encode($return);

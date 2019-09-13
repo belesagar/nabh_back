@@ -16,7 +16,7 @@ class OfferController extends Controller
     }
 
     public function offerList(Request $request) {
-        $list = $this->offers->all()->toArray();
+        $list = $this->offers->orderBy('created_at', 'desc')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true,"error_code"=>0,"info" => "Success","data" => $data);
         return json_encode($return);

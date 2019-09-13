@@ -10,6 +10,9 @@ use App\Model\IndicatorsDataHistory;
 use App\Model\NabhIndicators;
 use App\Model\HospitalRegistration;
 use App\Model\HospitalUsersIndicators;
+use App\Model\IndicatorsFormsFields;
+use App\Model\IndicatorsFormsFieldsValidations;
+use App\Model\HospitalDoctors;
 
 class NabhIndicatorsController extends Controller
 {
@@ -21,6 +24,9 @@ class NabhIndicatorsController extends Controller
         $this->nabh_indicators = new NabhIndicators();
         $this->hospiatl_registration = new HospitalRegistration();
         $this->hospital_users_indicators = new HospitalUsersIndicators();
+        $this->indicators_forms_fields = new IndicatorsFormsFields();
+        $this->indicators_forms_fields_validations = new IndicatorsFormsFieldsValidations();
+        $this->hospital_doctors = new HospitalDoctors();
 
  		$this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -35,9 +41,57 @@ class NabhIndicatorsController extends Controller
     }
 
     public function getIndicatorsInput(Request $request) {
+        $request_data = $request->all();
+        $indicator_id = $request_data['indicator_id'];
+        
+        $indicators_input = [];
 
-    	$indicators_input = \Helpers::genIndicatorsInput();
+        $indicator_data = $this->indicators_forms_fields->select("form_id","form_type as type","form_name as input_name","label","placeholder","id","class","data_show_type")->with(['getValidations' => function($query) {
+            $query->select('form_id','validations');
+        }])->where([
+            ['indicators_ids','like', '%'.$indicator_id.'%'],
+            ['status','ACTIVE']
+        ])->get()->toArray();
+           
+       
+        foreach ($indicator_data as $key => $value) {
+            $value['validation'] = [];
+            $value['required'] = false;
+            foreach ($value['get_validations'] as $validation_data) {
+                $value['validation'] = json_decode($validation_data['validations'],true);
 
+                //For required
+                foreach ($value['validation'] as $key => $validation_value) {
+                    if($validation_value['type'] == "required")
+                    {
+                        $value['required'] = $validation_value['required'];
+                    }
+                }
+
+            }
+            unset($value['form_id']);    
+            unset($value['get_validations']);    
+
+            $value["data"] = "";
+            $value["data_value"] = [];
+
+            //For data type
+            if($value['data_show_type'] == "doctor")
+            {
+                $this->hospital_id = 1;
+                
+                $doctor_list = $this->hospital_doctors->select('doctor_id','name')->where("hospital_id",$this->hospital_id)->get()->toArray();
+
+                $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list,'doctor_id','name');
+            }
+            if($value['data_show_type'] == "yesno")
+            {
+                $value["data_value"] = array("Yes"=>"Yes","No"=>"No");
+            }
+
+            $indicators_input[] = $value;
+        }
+     
     	$return = array("success" => true,"error_code"=>0,"info" => "","data"=>$indicators_input);
     	return response()->json($return);
     }
@@ -96,7 +150,7 @@ class NabhIndicatorsController extends Controller
     	$request_data = $request->all();
     	$hospital_id = $this->payload['hospital_id'];
 
-    	$indicator_data = $this->indicators_data->where('hospital_id', $hospital_id)->where('indicators_id', $request_data['indicator_id'])->get();
+    	$indicator_data = $this->indicators_data->where('hospital_id', $hospital_id)->where('indicators_id', $request_data['indicator_id'])->orderBy('created_at', 'desc')->get();
 
     	$return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_data);
     	return response()->json($return);
