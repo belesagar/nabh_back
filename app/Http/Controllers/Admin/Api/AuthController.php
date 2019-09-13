@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin\Api;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
-use App\Model\AdminUser;
+use App\Model\AdminUser; 
 use JWTFactory;
 use JWTAuth;
 
