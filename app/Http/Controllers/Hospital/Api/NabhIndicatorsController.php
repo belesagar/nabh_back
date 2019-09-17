@@ -45,6 +45,7 @@ class NabhIndicatorsController extends Controller
         $indicator_id = $request_data['indicator_id'];
         
         $indicators_input = [];
+        $form_name_array = [];
 
         $indicator_data = $this->indicators_forms_fields->select("form_id","form_type as type","form_name as input_name","label","placeholder","id","class","data_show_type")->with(['getValidations' => function($query) {
             $query->select('form_id','validations');
@@ -90,9 +91,10 @@ class NabhIndicatorsController extends Controller
             }
 
             $indicators_input[] = $value;
+            $form_name_array[] = $value['input_name'];
         }
      
-    	$return = array("success" => true,"error_code"=>0,"info" => "","data"=>$indicators_input);
+    	$return = array("success" => true,"error_code"=>0,"info" => "","data"=>["indicators_input" => $indicators_input,"form_name_array" => $form_name_array]);
     	return response()->json($return);
     }
 
@@ -100,13 +102,13 @@ class NabhIndicatorsController extends Controller
 
 
     	$request_data = $request->all();
-    	$user_id = 1;
     	$insert_data = $request_data;
 
     	$updated_data = json_encode($insert_data);
 
     	$insert_data['hospital_id'] = $this->payload['hospital_id'];
-    	$insert_data['indicators_unique_id'] = date("His");
+        $indicators_unique_id = date("His");
+    	$insert_data['indicators_unique_id'] = $indicators_unique_id;
     	$insert_data['indicators_id'] = 1;
     	$insert_data['date'] = date("Y-m-d",strtotime($request_data['date']));
 
@@ -116,8 +118,8 @@ class NabhIndicatorsController extends Controller
         	$indicators_history_data = array(
         		"hospital_id" => $this->payload['hospital_id'],
         		"indicator_id" => 1,
-        		"indicator_data_id" => $response_id,
-        		"updated_by_id" => $user_id,
+        		"indicator_data_id" => $indicators_unique_id,
+        		"updated_by_id" => $this->hospital_user_id,
         		"updated_data" => $updated_data,
         	);
 
@@ -146,7 +148,7 @@ class NabhIndicatorsController extends Controller
     	return response()->json($return);
     }
     
-    public function getIndicatorData(Request $request) {
+    public function getIndicatorFormDataList(Request $request) {
     	$request_data = $request->all();
     	$hospital_id = $this->payload['hospital_id'];
 
@@ -210,6 +212,68 @@ class NabhIndicatorsController extends Controller
 
         }
         return json_encode($return);
+    }
+
+    public function getIndicatorFormData(Request $request) {
+        $request_data = $request->all();
+        $hospital_id = $this->payload['hospital_id'];
+
+        $indicator_form_data = $this->indicators_data->where([
+            ['hospital_id', $hospital_id],['indicators_id', $request_data['indicator_id']],["indicators_unique_id",$request_data['dataid']]])->first();
+        
+        if(!empty($indicator_form_data))
+        {
+            $return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_form_data);
+        }else{
+            $return = array("success" => false,"error_code"=>1,"info" => "Invalid Data");
+        }
+        return response()->json($return);
+    }
+
+    public function updateIndicatorFormData(Request $request) {
+        
+        $request_data = $request->all();
+        $insert_data = $request_data;
+
+        $hospital_unique_id = $insert_data['dataid'];
+        $indicator_id = $insert_data['indicator_id'];
+
+        unset($insert_data['dataid']);
+        unset($insert_data['indicator_id']);
+
+        
+        $updated_data = json_encode($insert_data);
+
+        $response_id = $this->indicators_data->where([['hospital_id',$this->payload['hospital_id']],["indicators_id",$indicator_id],['indicators_unique_id',$hospital_unique_id]])->update($insert_data);
+        if($response_id)
+        {
+            $indicators_history_data = array(
+                "hospital_id" => $this->payload['hospital_id'],
+                "indicator_id" => $indicator_id,
+                "indicator_data_id" => $hospital_unique_id,
+                "updated_by_id" => $this->hospital_user_id,
+                "updated_data" => $updated_data,
+            );
+
+            $indicators_history_response = $this->indicators_data_history->create($indicators_history_data);
+
+            $return = array("success" => true,"error_code"=>0,"info" => "Data Successfully Added.");
+        }else{
+            $return = array("success" => false,"error_code"=>1,"info" => "Something is wrong, Please try again.");
+        }
+        
+        return response()->json($return);
+    }
+
+    public function getIndicatorFormDataDetails(Request $request) {
+        $request_data = $request->all();
+        $hospital_id = $this->payload['hospital_id'];
+
+        $indicator_form_data = $this->indicators_data->where([
+            ['hospital_id', $hospital_id],["indicators_unique_id",$request_data['dataid']]])->first();
+
+        $return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_form_data);
+        return response()->json($return);
     }
 
 }
