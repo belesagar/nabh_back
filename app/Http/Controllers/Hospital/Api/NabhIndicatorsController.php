@@ -13,6 +13,10 @@ use App\Model\HospitalUsersIndicators;
 use App\Model\IndicatorsFormsFields;
 use App\Model\IndicatorsFormsFieldsValidations;
 use App\Model\HospitalDoctors;
+use App\Model\HospitalOtInformation;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Excel\DataExportController;
+use Illuminate\Support\Facades\Storage;
 
 class NabhIndicatorsController extends Controller
 {
@@ -27,6 +31,7 @@ class NabhIndicatorsController extends Controller
         $this->indicators_forms_fields = new IndicatorsFormsFields();
         $this->indicators_forms_fields_validations = new IndicatorsFormsFieldsValidations();
         $this->hospital_doctors = new HospitalDoctors();
+        $this->hospital_ot_information = new HospitalOtInformation();
 
  		$this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -77,14 +82,31 @@ class NabhIndicatorsController extends Controller
             $value["data_value"] = [];
 
             //For data type
+            //doctor, ot, yesno, time_select
             if($value['data_show_type'] == "doctor")
             {
-                $this->hospital_id = 1;
-                
-                $doctor_list = $this->hospital_doctors->select('doctor_id','name')->where("hospital_id",$this->hospital_id)->get()->toArray();
+                $doctor_list = $this->hospital_doctors->select('doctor_id','name')->where([
+                    ["hospital_id",$this->hospital_id],
+                    ["status","ACTIVE"]
+                ])->get()->toArray();
 
                 $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list,'doctor_id','name');
             }
+            if($value['data_show_type'] == "ot")
+            {
+                $ot_list = $this->hospital_ot_information->select('ot_id','ot_name')->where([
+                    ["hospital_id",$this->hospital_id],
+                    ["status","ACTIVE"]
+                ])->get()->toArray();
+
+                $value["data_value"] = \Helpers::convertKeyValuePair($ot_list,'ot_id','ot_name');
+            }
+            if($value['data_show_type'] == "time_select")
+            {
+                $time_select_array = ["00:30" => "00:30"];
+
+                $value["data_value"] = $time_select_array;
+            } 
             if($value['data_show_type'] == "yesno")
             {
                 $value["data_value"] = array("Yes"=>"Yes","No"=>"No");
@@ -100,24 +122,28 @@ class NabhIndicatorsController extends Controller
 
     public function savendicatorsData(Request $request) {
 
-
     	$request_data = $request->all();
     	$insert_data = $request_data;
+        unset($insert_data['indicator_id']);
 
     	$updated_data = json_encode($insert_data);
 
     	$insert_data['hospital_id'] = $this->payload['hospital_id'];
         $indicators_unique_id = date("His");
     	$insert_data['indicators_unique_id'] = $indicators_unique_id;
-    	$insert_data['indicators_id'] = 1;
-    	$insert_data['date'] = date("Y-m-d",strtotime($request_data['date']));
-
+        $indicator_id = $request_data['indicator_id'];
+    	$insert_data['indicators_id'] = $indicator_id;
+        if(!empty($request_data['date']))
+        {
+    	   $insert_data['date'] = date("Y-m-d",strtotime($request_data['date']));
+        }
+        
         $response_id = $this->indicators_data->insertGetId($insert_data);
         if($response_id)
         {
         	$indicators_history_data = array(
         		"hospital_id" => $this->payload['hospital_id'],
-        		"indicator_id" => 1,
+        		"indicator_id" => $indicator_id,
         		"indicator_data_id" => $indicators_unique_id,
         		"updated_by_id" => $this->hospital_user_id,
         		"updated_data" => $updated_data,
@@ -151,10 +177,49 @@ class NabhIndicatorsController extends Controller
     public function getIndicatorFormDataList(Request $request) {
     	$request_data = $request->all();
     	$hospital_id = $this->payload['hospital_id'];
+        $indicator_id = $request_data['indicator_id'];
 
-    	$indicator_data = $this->indicators_data->where('hospital_id', $hospital_id)->where('indicators_id', $request_data['indicator_id'])->orderBy('created_at', 'desc')->get();
+        $return = $this->getIndicatorColumns($indicator_id);
+        if($return['success'])
+        {
+            $indicators_columns = [];
+            if(isset($request_data['type']) && $request_data['type'] == "excel")
+            {   
+                $indicators_columns[] = "indicators_unique_id";
+                $indicators_columns[] = "indicators_id";
+                $indicators_columns = array_merge($indicators_columns,$return['data']['column_data']);
+            }else{
+                $indicators_columns = ['*'];
+            }
 
-    	$return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_data);
+            $indicator_data = $this->indicators_data->select($indicators_columns)->where('hospital_id', $hospital_id)->where('indicators_id', $indicator_id)->orderBy('created_at', 'desc')->get();
+            if(count($indicator_data) > 0)
+            {
+                //This for download excel
+                if(isset($request_data['type']) && $request_data['type'] == "excel")
+                {
+                    $heading_array = array_keys($indicator_data[0]->toArray());
+                    $excel_data = ["excel_data"=>$indicator_data,"heading_array" => $heading_array];
+
+                    $file_name = $hospital_id.$request_data['indicator_id'].$indicator_data[0]->indicators_unique_id.".xlsx";
+
+                    Excel::store(new DataExportController($excel_data),"public/hospital/excel/".$file_name);
+                    $file_url = Storage::url('hospital/excel/'.$file_name);
+
+                    $data = ["file_url" => $file_url];
+
+                }else{
+
+                    $data = ["list_data" => $indicator_data];
+                }
+                $return = array("success" => true,"error_code"=>0,"info" => "","data" => $data);
+            }else{
+                $return = array("success" => false,"error_code"=>1,"info" => "Indicators data not present.");
+            }
+        }else{
+            $return = array("success" => false,"error_code"=>1,"info" => "Indicators data not present.");
+        }
+
     	return response()->json($return);
     }
 
@@ -220,7 +285,7 @@ class NabhIndicatorsController extends Controller
 
         $indicator_form_data = $this->indicators_data->where([
             ['hospital_id', $hospital_id],['indicators_id', $request_data['indicator_id']],["indicators_unique_id",$request_data['dataid']]])->first();
-        
+
         if(!empty($indicator_form_data))
         {
             $return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_form_data);
@@ -268,12 +333,54 @@ class NabhIndicatorsController extends Controller
     public function getIndicatorFormDataDetails(Request $request) {
         $request_data = $request->all();
         $hospital_id = $this->payload['hospital_id'];
+        $indicator_id = $request_data['indicator_id'];
 
-        $indicator_form_data = $this->indicators_data->where([
+        /*$indicator_data = $this->indicators_forms_fields->select("form_name as input_name","label")->where([
+            ['indicators_ids','like', '%'.$indicator_id.'%'],
+            ['status','ACTIVE']
+        ])->get()->toArray();
+
+        foreach ($indicator_data as $key => $value) {
+            $columns[] = $value['input_name']." as ".$value['label'];
+        }*/
+
+        $columns = $this->getIndicatorColumns($indicator_id);
+
+        $columns[] = "indicators_unique_id";
+        $columns[] = "indicators_id";
+
+        $indicator_form_data = $this->indicators_data->select($columns)->where([
             ['hospital_id', $hospital_id],["indicators_unique_id",$request_data['dataid']]])->first();
+        
+        if(!empty($indicator_form_data))
+        {
+            $return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_form_data);
+        }else{
+            $return = array("success" => false,"error_code"=>1,"info" => "Invalid Data");
+        }
 
-        $return = array("success" => true,"error_code"=>0,"info" => "","data" => $indicator_form_data);
         return response()->json($return);
+    }
+
+    //This for getiing indicator columns
+    private function getIndicatorColumns($indicator_id = 0) {
+        if($indicator_id > 0)
+        {
+            $indicator_data = $this->indicators_forms_fields->select("form_name as input_name","label")->where([
+                ['indicators_ids','like', '%'.$indicator_id.'%'],
+                ['status','ACTIVE']
+            ])->get()->toArray();
+
+            foreach ($indicator_data as $key => $value) {
+                $columns[] = $value['input_name']." as ".$value['label'];
+            }
+
+            $return = array("success" => true,"error_code"=>0,"info" => "","data"=>["column_data" => $columns]);
+        }else{
+            $return = array("success" => false,"error_code"=>1,"info" => "Invalid Indicator");
+        }
+
+        return $return;
     }
 
 }

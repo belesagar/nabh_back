@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\AdminUser;
+use App\Model\IndicatorsData;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -12,6 +14,8 @@ class AuthController extends Controller
     {
         $this->folder_name = "admin.Authentication.";
         $this->admin_user = new AdminUser();
+        $this->indicators_data = new IndicatorsData();
+        // $this->export_data = new DataExportController();
  
     }
 
@@ -199,6 +203,23 @@ class AuthController extends Controller
     public function logout(Request $request) {
         $request->session()->forget('admin_user_login');
         return redirect()->route('admin.login');
+    }
+
+    public function downloadExcel()
+    {
+        // return Excel::store($this->export_data, 'users.xlsx');
+        // dd(public_path('hospital'));
+//         $data = $this->indicators_data->all();
+//         $heading_array = array_keys($data[0]->toArray());
+
+//         $excel_data = ["excel_data"=>$data,"heading_array" => $heading_array];
+
+//         Excel::store(new DataExportController1($excel_data),"public/hospital/excel/users12.xlsx");
+
+// #
+//         // return Excel::store(new DataExportController($excel_data), 'users.xlsx');
+//         dd(Storage::url('hospital/excel/users12.xlsx'));
+//         dd(Storage::url('hospital/excel/users.xlsx'));
     }
 
 }

@@ -199,4 +199,44 @@ class Helpers {
         return $pair_array;
     }
 
+    public static function encrypt($plainText, $key) {
+        $secret = self::hextobin(md5($key));
+        $plainPad = self::pkcs5_pad($plainText, 16);
+        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
+        $encryptedText = openssl_encrypt($plainPad, 'AES-128-CBC', $secret, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector);
+        return bin2hex($encryptedText);
+    }
+
+    public static function decrypt($encryptedText, $key) {
+        $secret = self::hextobin(md5($key));
+        $encryptedText = self::hextobin($encryptedText);
+        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
+        $decryptedText = openssl_decrypt($encryptedText, 'AES-128-CBC', $secret, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector);
+        $decryptedText = rtrim($decryptedText, "\0");
+        return $decryptedText;
+    }
+
+    public static function pkcs5_pad($plainText, $blockSize) {
+        $pad = $blockSize - (strlen($plainText) % $blockSize);
+        return $plainText . str_repeat(chr(0), $pad); //issue with caratlane - bad decrypt issue
+    }
+
+    public static function hextobin($hexString) {
+        $length = strlen($hexString);
+        $binString = "";
+        $count = 0;
+        while ($count < $length) {
+            $subString = substr($hexString, $count, 2);
+            $packedString = pack("H*", $subString);
+            if ($count == 0) {
+                $binString = $packedString;
+            } else {
+                $binString .= $packedString;
+            }
+
+            $count += 2;
+        }
+        return $binString;
+    }
+    
 }

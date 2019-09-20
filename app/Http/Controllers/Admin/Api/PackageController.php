@@ -73,6 +73,7 @@ class PackageController extends Controller
 	        if(!empty($this->payload))
 	        {
 	        	$insert_data = array(
+                    "package_reference_number" => date("his"),
 	        		"package_name" => $request_data['package_name'],
 					"package_amount" => $request_data['package_amount'],
 					"per_month_amount" => $request_data['per_month_amount'],
