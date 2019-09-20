@@ -102,6 +102,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::get('getindicatorlist', 'NabhIndicatorsController@getIndicatorsList');
 			Route::post('getindicatordata', 'NabhIndicatorsController@getIndicatorFormDataList');
 			Route::post('indicator/formdata', 'NabhIndicatorsController@getIndicatorFormData');
+			Route::post('indicator/formdata/details', 'NabhIndicatorsController@getIndicatorFormDataDetails');
 			Route::post('update/indicatorsdata', 'NabhIndicatorsController@updateIndicatorFormData');
 
 			//Indicator List
@@ -117,6 +118,7 @@ Route::group(['middleware' => ['Cors']], function () {
 
 			//Hospital Packages
 			Route::get('packages/getlist', 'HospitalPackagesController@List');
+			Route::post('package/details', 'HospitalPackagesController@packageDetails');
 
 			//Assign Indicators
 			Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators');
@@ -132,6 +134,10 @@ Route::group(['middleware' => ['Cors']], function () {
 			//OT Route
 			Route::get('ot/getlist', 'OtController@List');
 
+			//Payments
+			Route::post('payment/initiate', 'HospitalTransactionController@initiatePayment');
+			Route::post('payment/check', 'HospitalTransactionController@checkPayment');
+			
 
 		});
 	});
