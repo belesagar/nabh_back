@@ -10,7 +10,7 @@ class HospitalUsers extends Authenticatable implements JWTSubject
 {
     protected $table = 'hospital_users';
     protected $primaryKey = 'hospital_user_id';
-    protected $fillable = ["hospital_id", "user_unique_id", "name", "email","password", "mobile", "city", "state", "role_id", "status"];
+    protected $guarded = [];
 
     public function getJWTIdentifier()
     {
@@ -26,5 +26,5 @@ class HospitalUsers extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    
+
 }

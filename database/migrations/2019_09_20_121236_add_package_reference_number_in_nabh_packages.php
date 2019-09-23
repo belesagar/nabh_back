@@ -14,7 +14,7 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
     public function up()
     {
         Schema::table('nabh_packages', function (Blueprint $table) {
-            $table->string('package_reference_number',50)->after('nabh_packages_id')->unique();
+            $table->string('package_reference_number',50)->unique()->after('nabh_packages_id');
         });
     }
 

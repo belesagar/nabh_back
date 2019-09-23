@@ -11,11 +11,11 @@ class AdminUser extends Authenticatable implements JWTSubject
     protected $table = 'admin_users';
     protected $primaryKey = 'admin_user_id';
 
-    protected $fillable = ['name','email','password','mobile','role','status','created_by'];
+    protected $guarded = [];
 
     public function role()
     {
-        return $this->belongsTo('App\Model\Role','role','role_id');
+        return $this->belongsTo('App\Model\Role', 'role', 'role_id');
     }
 
     public function getJWTIdentifier()

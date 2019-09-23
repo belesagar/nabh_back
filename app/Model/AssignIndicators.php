@@ -12,7 +12,7 @@ class AssignIndicators extends Model
 
     public function indicators()
     {
-        return $this->belongsTo('App\Model\NabhIndicators','indicators_id','indicators_id');
+        return $this->belongsTo('App\Model\NabhIndicators', 'indicators_id', 'indicators_id');
     }
 
 }
