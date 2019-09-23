@@ -12,7 +12,8 @@ class IndicatorsFormsFields extends Model
 
     public function getValidations()
     {
-        return $this->hasMany('App\Model\IndicatorsFormsFieldsValidations','form_id','form_id');//->select(array('form_id','validations'))
+        return $this->hasMany('App\Model\IndicatorsFormsFieldsValidations', 'form_id',
+            'form_id');//->select(array('form_id','validations'))
     }
 
 }
