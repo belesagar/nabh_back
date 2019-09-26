@@ -13,6 +13,7 @@ use App\Model\HospitalUsersIndicators;
 use App\Model\IndicatorsFormsFields;
 use App\Model\IndicatorsFormsFieldsValidations;
 use App\Model\HospitalDoctors;
+use App\Model\HospitalPatient;
 use App\Model\HospitalOtInformation;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Excel\DataExportController;
@@ -31,6 +32,7 @@ class NabhIndicatorsController extends Controller
         $this->indicators_forms_fields = new IndicatorsFormsFields();
         $this->indicators_forms_fields_validations = new IndicatorsFormsFieldsValidations();
         $this->hospital_doctors = new HospitalDoctors();
+        $this->hospital_patient = new HospitalPatient();
         $this->hospital_ot_information = new HospitalOtInformation();
 
         $this->payload = auth('hospital_api')->user();
@@ -49,80 +51,175 @@ class NabhIndicatorsController extends Controller
     public function getIndicatorsInput(Request $request)
     {
         $request_data = $request->all();
-        $indicator_id = $request_data['indicator_id'];
 
-        $indicators_input = [];
-        $form_name_array = [];
+        $formdata = $this->getFormField($request_data);
 
-        $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
-            "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type")->with([
-            'getValidations' => function ($query) {
-                $query->select('form_id', 'validations');
-            }
-        ])->where([
-            ['indicators_ids', 'like', '%' . $indicator_id . '%'],
-            ['status', 'ACTIVE']
-        ])->get()->toArray();
+        /* $indicators_input = [];
+         $form_name_array = [];
+
+         $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
+             "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type")->with([
+             'getValidations' => function ($query) {
+                 $query->select('form_id', 'validations');
+             }
+         ])->where([
+             ['indicators_ids', 'like', '%' . $indicator_id . '%'],
+             ['status', 'ACTIVE']
+         ])->get()->toArray();
 
 
-        foreach ($indicator_data as $key => $value) {
-            $value['validation'] = [];
-            $value['required'] = false;
-            foreach ($value['get_validations'] as $validation_data) {
-                $value['validation'] = json_decode($validation_data['validations'], true);
+         foreach ($indicator_data as $key => $value) {
+             if ($value['handle_type'] == "" || $value['handle_type'] == "outside") {
+                 $value['validation'] = [];
+                 $value['required'] = false;
+                 foreach ($value['get_validations'] as $validation_data) {
+                     $value['validation'] = json_decode($validation_data['validations'], true);
 
-                //For required
-                foreach ($value['validation'] as $key => $validation_value) {
-                    if ($validation_value['type'] == "required") {
-                        $value['required'] = $validation_value['required'];
-                    }
-                }
+                     //For required
+                     foreach ($value['validation'] as $key => $validation_value) {
+                         if ($validation_value['type'] == "required") {
+                             $value['required'] = $validation_value['required'];
+                         }
+                     }
 
-            }
-            unset($value['form_id']);
-            unset($value['get_validations']);
+                 }
+                 unset($value['form_id']);
+                 unset($value['get_validations']);
 
-            $value["data"] = "";
-            $value["data_value"] = [];
+                 $value["data"] = "";
+                 $value["data_value"] = [];
 
-            //For data type
-            //doctor, ot, yesno, time_select
-            if ($value['data_show_type'] == "doctor") {
-                $doctor_list = $this->hospital_doctors->select('doctor_id', 'name')->where([
-                    ["hospital_id", $this->hospital_id],
-                    ["status", "ACTIVE"]
-                ])->get()->toArray();
+                 //For data type
+                 //doctor, ot, yesno, time_select
+                 if ($value['data_show_type'] == "doctor") {
+                     $doctor_list = $this->hospital_doctors->select('doctor_id', 'name')->where([
+                         ["hospital_id", $this->hospital_id],
+                         ["status", "ACTIVE"]
+                     ])->get()->toArray();
 
-                $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list, 'doctor_id', 'name');
-            }
-            if ($value['data_show_type'] == "ot") {
-                $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
-                    ["hospital_id", $this->hospital_id],
-                    ["status", "ACTIVE"]
-                ])->get()->toArray();
+                     $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list, 'doctor_id', 'name');
+                 }
+                 if ($value['data_show_type'] == "ot") {
+                     $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
+                         ["hospital_id", $this->hospital_id],
+                         ["status", "ACTIVE"]
+                     ])->get()->toArray();
 
-                $value["data_value"] = \Helpers::convertKeyValuePair($ot_list, 'ot_id', 'ot_name');
-            }
-            if ($value['data_show_type'] == "time_select") {
-                $time_select_array = ["00:30" => "00:30"];
+                     $value["data_value"] = \Helpers::convertKeyValuePair($ot_list, 'ot_id', 'ot_name');
+                 }
+                 if ($value['data_show_type'] == "time_select") {
+                     $time_select_array = ["00:30" => "00:30"];
 
-                $value["data_value"] = $time_select_array;
-            }
-            if ($value['data_show_type'] == "yesno") {
-                $value["data_value"] = array("Yes" => "Yes", "No" => "No");
-            }
+                     $value["data_value"] = $time_select_array;
+                 }
+                 if ($value['data_show_type'] == "yesno") {
+                     $value["data_value"] = array("Yes" => "Yes", "No" => "No");
+                 }
 
-            $indicators_input[] = $value;
-            $form_name_array[] = $value['input_name'];
-        }
+                 $indicators_input[] = $value;
+                 $form_name_array[] = $value['input_name'];
+             }
+         }*/
 
         $return = array(
             "success" => true,
             "error_code" => 0,
             "info" => "",
-            "data" => ["indicators_input" => $indicators_input, "form_name_array" => $form_name_array]
+            "data" => [
+                "indicators_input" => $formdata['indicators_input'],
+                "form_name_array" => $formdata['form_name_array']
+            ]
         );
         return response()->json($return);
+    }
+
+    public function getFormField($postdata)
+    {
+        $indicators_input = [];
+        $form_name_array = [];
+        $all_form_name_array = [];
+
+        $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
+            "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type")->with([
+            'getValidations' => function ($query) {
+                $query->select('form_id', 'validations');
+            }
+        ])->where([
+            ['indicators_ids', 'like', '%' . $postdata['indicator_id'] . '%'],
+            ['status', 'ACTIVE']
+        ])->get()->toArray();
+
+
+        foreach ($indicator_data as $key => $value) {
+            if ($value['handle_type'] == "" || $value['handle_type'] == "outside") {
+                $value['validation'] = [];
+                $value['required'] = false;
+                foreach ($value['get_validations'] as $validation_data) {
+                    $value['validation'] = json_decode($validation_data['validations'], true);
+
+                    //For required
+                    foreach ($value['validation'] as $key => $validation_value) {
+                        if ($validation_value['type'] == "required") {
+                            $value['required'] = $validation_value['required'];
+                        }
+                    }
+
+                }
+                unset($value['form_id']);
+                unset($value['get_validations']);
+
+                $value["data"] = "";
+                $value["data_value"] = [];
+
+                //For data type
+                //doctor, ot, yesno, time_select
+                if ($value['data_show_type'] == "doctor") {
+                    $doctor_list = $this->hospital_doctors->select('doctor_id', 'name')->where([
+                        ["hospital_id", $this->hospital_id],
+                        ["status", "ACTIVE"]
+                    ])->get()->toArray();
+
+                    $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list, 'doctor_id', 'name');
+                }
+                if ($value['data_show_type'] == "ot") {
+                    $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
+                        ["hospital_id", $this->hospital_id],
+                        ["status", "ACTIVE"]
+                    ])->get()->toArray();
+
+                    $value["data_value"] = \Helpers::convertKeyValuePair($ot_list, 'ot_id', 'ot_name');
+                }
+
+                if ($value['data_show_type'] == "patient") {
+                    $patient_list = $this->hospital_patient->select('patient_reference_number', 'patient_name')->where([
+                        ["hospital_id", $this->hospital_id],
+                        ["status", "ACTIVE"]
+                    ])->get()->toArray();
+
+                    $value["data_value"] = \Helpers::convertKeyValuePair($patient_list, 'patient_reference_number',
+                        'patient_name');
+                }
+
+                if ($value['data_show_type'] == "time_select") {
+                    $time_select_array = ["00:30" => "00:30"];
+
+                    $value["data_value"] = $time_select_array;
+                }
+                if ($value['data_show_type'] == "yesno") {
+                    $value["data_value"] = array("Yes" => "Yes", "No" => "No");
+                }
+
+                $indicators_input[] = $value;
+                $form_name_array[] = $value['input_name'];
+            }
+            $all_form_name_array[] = $value;
+        }
+        $data = [
+            'all_form_name_array' => $all_form_name_array,
+            'form_name_array' => $form_name_array,
+            'indicators_input' => $indicators_input
+        ];
+        return $data;
     }
 
     public function savendicatorsData(Request $request)
@@ -133,6 +230,15 @@ class NabhIndicatorsController extends Controller
         unset($insert_data['indicator_id']);
 
         $updated_data = json_encode($insert_data);
+
+        $postdata = ['indicator_id' => $request_data['indicator_id']];
+        $formdata = $this->getFormField($postdata);
+
+        foreach ($formdata['all_form_name_array'] as $form_data) {
+            if ($form_data['handle_type'] == "inside") {
+                $insert_data[$form_data['input_name']] = $this->hospital_user_id;
+            }
+        }
 
         $insert_data['hospital_id'] = $this->payload['hospital_id'];
         $indicators_unique_id = date("His");
@@ -318,6 +424,14 @@ class NabhIndicatorsController extends Controller
         unset($insert_data['dataid']);
         unset($insert_data['indicator_id']);
 
+        $postdata = ['indicator_id' => $indicator_id];
+        $formdata = $this->getFormField($postdata);
+
+        foreach ($formdata['all_form_name_array'] as $form_data) {
+            if ($form_data['handle_type'] == "inside") {
+                $insert_data[$form_data['input_name']] = $this->hospital_user_id;
+            }
+        }
 
         $updated_data = json_encode($insert_data);
 
@@ -360,22 +474,23 @@ class NabhIndicatorsController extends Controller
             $columns[] = $value['input_name']." as ".$value['label'];
         }*/
 
-        $columns = $this->getIndicatorColumns($indicator_id);
+        $return = $this->getIndicatorColumns($indicator_id);
+        if ($return['success']) {
+            $columns = $return['data']['column_data'];
+            $columns[] = "indicators_unique_id";
+            $columns[] = "indicators_id";
 
-        $columns[] = "indicators_unique_id";
-        $columns[] = "indicators_id";
+            $indicator_form_data = $this->indicators_data->select($columns)->where([
+                ['hospital_id', $hospital_id],
+                ["indicators_unique_id", $request_data['dataid']]
+            ])->first();
 
-        $indicator_form_data = $this->indicators_data->select($columns)->where([
-            ['hospital_id', $hospital_id],
-            ["indicators_unique_id", $request_data['dataid']]
-        ])->first();
-
-        if (!empty($indicator_form_data)) {
-            $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $indicator_form_data);
-        } else {
-            $return = array("success" => false, "error_code" => 1, "info" => "Invalid Data");
+            if (!empty($indicator_form_data)) {
+                $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $indicator_form_data);
+            } else {
+                $return = array("success" => false, "error_code" => 1, "info" => "Invalid Data");
+            }
         }
-
         return response()->json($return);
     }
 

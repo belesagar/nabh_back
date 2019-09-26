@@ -18,9 +18,10 @@ class HospitalTransactionController extends Controller
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
 
-        $this->api = new Api("rzp_test_a8i85PIwYFA2rr", "5lxZSpm4wxmKs5xTr6scBVe0");
+        $this->api = new Api("rzp_test_QEecyXWy9NgWDK", "7QjTWPBmu5VFy1XJCt3WWPm1");
 
-        // dd($this->payload);
+        // print_r(new Api("rzp_test_QEecyXWy9NgWDK", "7QjTWPBmu5VFy1XJCt3WWPm1"));
+        // exit;
     }
 
     public function initiatePayment(Request $request)
@@ -82,7 +83,30 @@ class HospitalTransactionController extends Controller
     public function checkPayment(Request $request)
     {
         $request_data = $request->all();
-        $order = $this->api->order->fetch($request_data['response_id']);
+
+        $payment_response = $this->api->payment->fetch($request_data['response_id']);
+        // $order = $this->api->order->all();
+        print_r($request_data);
+        print_r($payment_response);
+        print_r($payment_response['id']);
+
+        if ($payment_response['id'] != "") {
+//            print_r($payment_response['notes']->encrypted_key);
+//            $encrypted_key = $payment_response['notes']->encrypted_key;
+//            $key = 123456;
+//            $decrypted_data = \Helpers::decrypt(json_encode($encrypted_key), $key);
+//            print_r($decrypted_data);
+            
+        } else {
+            $return = array(
+                "success" => false,
+                "error_code" => 1,
+                "info" => "Something is wrong with transaction.."
+            );
+        }
+
+        exit;
+
         $return = array(
             "success" => true,
             "error_code" => 0,

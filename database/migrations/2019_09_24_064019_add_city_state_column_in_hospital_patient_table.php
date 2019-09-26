@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPackageReferenceNumberInNabhPackages extends Migration
+class AddCityStateColumnInHospitalPatientTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function up()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
-            $table->string('package_reference_number',50)->unique()->after('nabh_packages_id')->nullable();
+        Schema::table('hospital_patient_table', function (Blueprint $table) {
+            $table->string('city', 30)->after('mobile')->nullable();
+            $table->string('state', 30)->after('mobile')->nullable();
         });
     }
 
@@ -25,7 +26,7 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function down()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
+        Schema::table('hospital_patient_table', function (Blueprint $table) {
             //
         });
     }

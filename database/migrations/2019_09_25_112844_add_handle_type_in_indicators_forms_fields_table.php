@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPackageReferenceNumberInNabhPackages extends Migration
+class AddHandleTypeInIndicatorsFormsFieldsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function up()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
-            $table->string('package_reference_number',50)->unique()->after('nabh_packages_id')->nullable();
+        Schema::table('indicators_forms_fields', function (Blueprint $table) {
+            $table->enum('handle_type',['inside','outside'])->after('data_show_type')->nullable();
         });
     }
 
@@ -25,7 +25,7 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function down()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
+        Schema::table('indicators_forms_fields', function (Blueprint $table) {
             //
         });
     }

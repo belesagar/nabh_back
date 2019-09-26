@@ -207,6 +207,8 @@ class NabhIndicatorsController extends Controller
                     "id" => $request_data['id'],
                     "class" => $request_data['class'],
                     "data_show_type" => $request_data['data_show_type'],
+                    "handle_type" => $request_data['handle_type'],
+                    "priority" => $request_data['priority'],
                     "status" => $request_data['status'],
                 );
 
@@ -367,6 +369,8 @@ class NabhIndicatorsController extends Controller
                     "id" => $request_data['id'],
                     "class" => $request_data['class'],
                     "data_show_type" => $request_data['data_show_type'],
+                    "handle_type" => $request_data['handle_type'],
+                    "priority" => $request_data['priority'],
                     "status" => $request_data['status'],
                 );
 
