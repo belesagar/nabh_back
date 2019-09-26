@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPackageReferenceNumberInNabhPackages extends Migration
+class AddDoctorTypeInHospitalDoctorsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function up()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
-            $table->string('package_reference_number',50)->unique()->after('nabh_packages_id')->nullable();
+        Schema::table('hospital_doctors', function (Blueprint $table) {
+            $table->string('doctor_type',60)->nullable();
+            $table->dropColumn('doctor_type_id');
         });
     }
 
@@ -25,8 +26,8 @@ class AddPackageReferenceNumberInNabhPackages extends Migration
      */
     public function down()
     {
-        Schema::table('nabh_packages', function (Blueprint $table) {
-            //
+        Schema::table('hospital_doctors', function (Blueprint $table) {
+            $table->integer('doctor_type_id')->nullable();
         });
     }
 }
