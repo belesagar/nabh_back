@@ -66,7 +66,7 @@ class HospitalPatientController extends Controller
             'city' => 'required',
             'state' => 'required',
             'address' => 'required',
-            'status' => 'required',
+//            'status' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -92,7 +92,7 @@ class HospitalPatientController extends Controller
                     "address" => $request_data['address'],
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
-                    "status" => $request_data['status']
+//                    "status" => $request_data['status']
                 );
 
                 $response = $this->hospital_patient->create($insert_data);
@@ -130,7 +130,7 @@ class HospitalPatientController extends Controller
             'city' => 'required',
             'state' => 'required',
             'address' => 'required',
-            'status' => 'required',
+//            'status' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -153,7 +153,7 @@ class HospitalPatientController extends Controller
                 "address" => $request_data['address'],
                 "city" => $request_data['city'],
                 "state" => $request_data['state'],
-                "status" => $request_data['status']
+//                "status" => $request_data['status']
             );
 
             $response = $this->hospital_patient->where('patient_reference_number',

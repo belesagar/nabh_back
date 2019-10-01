@@ -208,7 +208,12 @@ class NabhIndicatorsController extends Controller
                 if ($value['data_show_type'] == "yesno") {
                     $value["data_value"] = array("Yes" => "Yes", "No" => "No");
                 }
-
+                if ($value['data_show_type'] == "rate1to5") {
+                    $value["data_value"] = array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5");
+                }
+                if ($value['data_show_type'] == "source_of_information") {
+                    $value["data_value"] = array("OLD PATIENT" => "OLD PATIENT", "PRACTO" => "PRACTO", "REF. DOCTORS" => "REF. DOCTORS", "OTHER" => "OTHER");
+                }
                 $indicators_input[] = $value;
                 $form_name_array[] = $value['input_name'];
             }
@@ -294,42 +299,43 @@ class NabhIndicatorsController extends Controller
         $indicator_id = $request_data['indicator_id'];
 
         $return = $this->getIndicatorColumns($indicator_id);
-        if ($return['success']) {
-            $indicators_columns = [];
-            if (isset($request_data['type']) && $request_data['type'] == "excel") {
-                $indicators_columns[] = "indicators_unique_id";
-                $indicators_columns[] = "indicators_id";
-                $indicators_columns = array_merge($indicators_columns, $return['data']['column_data']);
-            } else {
-                $indicators_columns = ['*'];
-            }
-
-            $indicator_data = $this->indicators_data->select($indicators_columns)->where('hospital_id',
-                $hospital_id)->where('indicators_id', $indicator_id)->orderBy('created_at', 'desc')->get();
-            if (count($indicator_data) > 0) {
-                //This for download excel
-                if (isset($request_data['type']) && $request_data['type'] == "excel") {
-                    $heading_array = array_keys($indicator_data[0]->toArray());
-                    $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array];
-
-                    $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
-
-                    Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
-                    $file_url = Storage::url('hospital/excel/' . $file_name);
-
-                    $data = ["file_url" => $file_url];
-
-                } else {
-
-                    $data = ["list_data" => $indicator_data];
-                }
-                $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
-            } else {
-                $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
-            }
+//        if ($return['success']) {
+        $indicators_columns = [];
+        if (isset($request_data['type']) && $request_data['type'] == "excel") {
+            $indicators_columns[] = "indicators_unique_id";
+            $indicators_columns[] = "indicators_id";
+            $indicators_columns = array_merge($indicators_columns, $return['data']['column_data']);
         } else {
-            $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
+            $indicators_columns = ['*'];
         }
+
+        $indicator_data = $this->indicators_data->select($indicators_columns)->where('hospital_id',
+            $hospital_id)->where('indicators_id', $indicator_id)->orderBy('created_at', 'desc')->get();
+        $data = [];
+        if (count($indicator_data) > 0) {
+            //This for download excel
+            if (isset($request_data['type']) && $request_data['type'] == "excel") {
+                $heading_array = array_keys($indicator_data[0]->toArray());
+                $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array];
+
+                $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
+
+                Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
+                $file_url = Storage::url('hospital/excel/' . $file_name);
+
+                $data = ["file_url" => $file_url];
+
+            } else {
+
+                $data = ["list_data" => $indicator_data];
+            }
+            $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+        } else {
+            $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+        }
+//        } else {
+//            $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
+//        }
 
         return response()->json($return);
     }
