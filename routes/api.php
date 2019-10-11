@@ -112,8 +112,10 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::get('users/getlist', 'HospitalUsersController@List');
 			Route::post('users/adddata', 'HospitalUsersController@Add');
 			Route::post('users/editdata', 'HospitalUsersController@Edit');
-			Route::post('users/getinfo', 'HospitalUsersController@getInfo');
-			Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
+            Route::post('profile/change-password', 'HospitalUsersController@changePassword');
+            Route::get('users/getinfo', 'HospitalUsersController@getInfo');
+            Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
+            Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
 			Route::match(['get', 'post'],'user/permission/{id}', 'HospitalUsersController@UserAssignIndicators');
 
 			//Hospital Packages
