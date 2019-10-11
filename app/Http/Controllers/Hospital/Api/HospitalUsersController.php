@@ -15,7 +15,7 @@ class HospitalUsersController extends Controller
         $this->hospital_users_indicators = new HospitalUsersIndicators();
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
-
+        $this->hospital_user_id = $this->payload['hospital_user_id'];
     }
 
     public function List(Request $request)
@@ -29,30 +29,18 @@ class HospitalUsersController extends Controller
 
     public function getInfo(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
-            'user_id' => 'required|numeric'
-        ]);
-
-        if ($validator->fails()) {
-            $errors_message = "";
-            $errors = $validator->errors()->all();
-            foreach ($errors as $key => $value) {
-                $errors_message .= $value . "\n";
-            }
-            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        $request_data = $request->all();
+        $user_data = $this->hospital_users->select("user_unique_id", "name", "email", "mobile", "city", "state", "role_id", "status", "address")->where('hospital_user_id',
+            $this->hospital_user_id)->where("hospital_id", $this->hospital_id)
+            ->get();
+        if (count($user_data) == 1) {
+            $data = array("user_data" => $user_data[0]);
+            $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         } else {
-            $request_data = $request->all();
-            $user_data = $this->hospital_users->where('hospital_user_id',
-                $request_data['user_id'])->where("hospital_id", $this->payload['hospital_id'])
-                ->get();
-            if (count($user_data) == 1) {
-                $data = array("user_data" => $user_data[0]);
-                $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
-            } else {
-                $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
-            }
-
+            $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
         }
+
+
         return json_encode($return);
     }
 
@@ -267,6 +255,121 @@ class HospitalUsersController extends Controller
                 }
             } else {
                 $return = array("success" => true, "error_code" => 0, "info" => "Indicators Applied Successfully.");
+            }
+
+        }
+        return json_encode($return);
+    }
+
+    public function saveProfileData(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'name' => 'required',
+            'city' => 'required',
+            'state' => 'required',
+            'address' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        } else {
+            $request_data = $request->all();
+            if (!empty($this->payload)) {
+
+
+                $update_data = array(
+                    "name" => $request_data['name'],
+                    "city" => $request_data['city'],
+                    "state" => $request_data['state'],
+                    "address" => $request_data['address'],
+                );
+
+
+                $response = $this->hospital_users->where('hospital_user_id',
+                    $this->hospital_user_id)->where("hospital_id",
+                    $this->hospital_id)->update($update_data);
+                if ($response) {
+                    $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
+                } else {
+                    $return = array(
+                        "success" => false,
+                        "error_code" => 1,
+                        "info" => "Something is wrong, please try again."
+                    );
+                }
+
+            } else {
+                $return = array(
+                    "success" => false,
+                    "error_code" => 1,
+                    "info" => "Something is wrong, please try again."
+                );
+            }
+
+        }
+        return json_encode($return);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'old_password' => 'required|min:3',
+            'new_password' => 'required|min:3|same:confirm_password',
+            'confirm_password' => 'required|min:3',
+
+        ]);
+
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        } else {
+            $request_data = $request->all();
+            if (!empty($this->payload)) {
+
+                $check_data = $this->hospital_users->select('hospital_user_id')->where([
+                    ['hospital_user_id', $this->hospital_user_id],
+                    ['hospital_id', $this->hospital_id],
+                    ['password', md5($request_data['old_password'])]
+                ])->first();
+
+                if (empty($check_data)) {
+                        $return = array("success" => false, "error_code" => 1, "info" => "Old password is wrong, Please try again.");
+                        return json_encode($return);
+                }
+
+                $update_data = array(
+                    "password" => md5($request_data['new_password'])
+                );
+
+
+                $response = $this->hospital_users->where('hospital_user_id',
+                    $this->hospital_user_id)->where("hospital_id",
+                    $this->hospital_id)->update($update_data);
+                if ($response) {
+                    $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
+                } else {
+                    $return = array(
+                        "success" => false,
+                        "error_code" => 1,
+                        "info" => "Something is wrong, please try again."
+                    );
+                }
+
+            } else {
+                $return = array(
+                    "success" => false,
+                    "error_code" => 1,
+                    "info" => "Something is wrong, please try again."
+                );
             }
 
         }

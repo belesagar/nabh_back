@@ -1,17 +1,19 @@
 <?php
 
-class Helpers {
+class Helpers
+{
 
     //This code for showing error and success message
-    public static function show_message() {
+    public static function show_message()
+    {
 
         $message = "";
         if (Session::has('success_message')) {
             $message = '
     			<div class="alert alert-success mb-2 class_alert_message" role="alert">
 			        ' .
-                    Session::get("success_message")
-                    . '
+                Session::get("success_message")
+                . '
 			        
 				</div>
     	';
@@ -21,23 +23,23 @@ class Helpers {
             $message = '
     			<div class="alert alert-danger mb-2 class_alert_message" role="alert">
 			        ' .
-                    Session::get("error_message")
-                    . '
+                Session::get("error_message")
+                . '
 			        
 				</div>
     	';
 
-        // Session()->forget('error_message');
-        
+            // Session()->forget('error_message');
+
         }
 
-        
 
         return $message;
     }
 
-    //This function for getting random code 
-    public static function genRandomCode($size) {
+    //This function for getting random code
+    public static function genRandomCode($size)
+    {
         $length = $size;
         $chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"; //length:36
         $final_rand = '';
@@ -48,7 +50,8 @@ class Helpers {
         return $final_rand;
     }
 
-    public static function genIndicatorsInput() {
+    public static function genIndicatorsInput()
+    {
         $indicators_input = array(
             array(
                 "type" => "text",
@@ -59,8 +62,8 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => true,"message" => "Field is required.","type" => "required"],
-                    ["minLength" => 3,"message" => "Field must be at least 3 characters long.","type" => "minLength"],
+                    ["required" => true, "message" => "Field is required.", "type" => "required"],
+                    ["minLength" => 3, "message" => "Field must be at least 3 characters long.", "type" => "minLength"],
                 ),
                 "data" => "",
                 "data_value" => []
@@ -74,8 +77,8 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => true,"message" => "Field is required.","type" => "required"],
-                    ["minLength" => 3,"message" => "Field must be at least 3 characters long.","type" => "minLength"],
+                    ["required" => true, "message" => "Field is required.", "type" => "required"],
+                    ["minLength" => 3, "message" => "Field must be at least 3 characters long.", "type" => "minLength"],
                 ),
                 "data" => "",
                 "data_value" => []
@@ -89,7 +92,7 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => true,"message" => "Field is required.","type" => "required"]
+                    ["required" => true, "message" => "Field is required.", "type" => "required"]
                 ),
                 "data" => "",
                 "data_value" => []
@@ -103,8 +106,8 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => true,"message" => "Field is required.","type" => "required"],
-                    ["minLength" => 3,"message" => "Field must be at least 3 characters long.","type" => "minLength"],
+                    ["required" => true, "message" => "Field is required.", "type" => "required"],
+                    ["minLength" => 3, "message" => "Field must be at least 3 characters long.", "type" => "minLength"],
                 ),
                 "data" => "",
                 "data_value" => []
@@ -118,11 +121,11 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => true,"message" => "Field is required.","type" => "required"],
-                    ["minLength" => 0,"message" => "Field must be at least 3 characters long.","type" => "minLength"],
+                    ["required" => true, "message" => "Field is required.", "type" => "required"],
+                    ["minLength" => 0, "message" => "Field must be at least 3 characters long.", "type" => "minLength"],
                 ),
                 "data" => "",
-                "data_value" => array("1"=>"VINOD BHARATI","2"=>"KH GIRI")
+                "data_value" => array("1" => "VINOD BHARATI", "2" => "KH GIRI")
             ),
             /*array(
                 "type" => "text",
@@ -178,8 +181,8 @@ class Helpers {
                 "id" => "",
                 "other" => "",
                 "validation" => array(
-                    ["required" => false,"message" => "Field is required.","type" => "required"],
-                    ["minLength" => 3,"message" => "Field must be at least 3 characters long.","type" => "minLength"],
+                    ["required" => false, "message" => "Field is required.", "type" => "required"],
+                    ["minLength" => 3, "message" => "Field must be at least 3 characters long.", "type" => "minLength"],
                 ),
                 "data" => "",
                 "data_value" => []
@@ -190,38 +193,59 @@ class Helpers {
 
     }
 
-    public static function convertKeyValuePair(Array $data,$key_name = "",$key_value = "") {
+    public static function convertKeyValuePair(Array $data, $key_name = "", $key_value = "")
+    {
         $pair_array = [];
         foreach ($data as $key => $value) {
-            $pair_array[$value[$key_name]] = $value[$key_value];
+//            $pair_array[$value[$key_name]] = $value[$key_value];
+            $pair_array[] = ["id" => $value[$key_name], "text" => $value[$key_value]];
         }
 
         return $pair_array;
     }
 
-    public static function encrypt($plainText, $key) {
+    public static function convertKeyIDTextPair(Array $data)
+    {
+        $pair_array[] = ["id" => "", "text" => "Select any one"];
+        foreach ($data as $key => $value) {
+//            $pair_array[$value[$key_name]] = $value[$key_value];
+            $pair_array[] = ["id" => $key, "text" => $value];
+        }
+
+        return $pair_array;
+    }
+
+    public static function encrypt($plainText, $key)
+    {
         $secret = self::hextobin(md5($key));
         $plainPad = self::pkcs5_pad($plainText, 16);
-        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
-        $encryptedText = openssl_encrypt($plainPad, 'AES-128-CBC', $secret, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector);
+        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
+            0x0e, 0x0f);
+        $encryptedText = openssl_encrypt($plainPad, 'AES-128-CBC', $secret, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING,
+            $initVector);
         return bin2hex($encryptedText);
     }
 
-    public static function decrypt($encryptedText, $key) {
+    public static function decrypt($encryptedText, $key)
+    {
         $secret = self::hextobin(md5($key));
         $encryptedText = self::hextobin($encryptedText);
-        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
-        $decryptedText = openssl_decrypt($encryptedText, 'AES-128-CBC', $secret, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector);
+        $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
+            0x0e, 0x0f);
+        $decryptedText = openssl_decrypt($encryptedText, 'AES-128-CBC', $secret,
+            OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $initVector);
         $decryptedText = rtrim($decryptedText, "\0");
         return $decryptedText;
     }
 
-    public static function pkcs5_pad($plainText, $blockSize) {
+    public static function pkcs5_pad($plainText, $blockSize)
+    {
         $pad = $blockSize - (strlen($plainText) % $blockSize);
         return $plainText . str_repeat(chr(0), $pad); //issue with caratlane - bad decrypt issue
     }
 
-    public static function hextobin($hexString) {
+    public static function hextobin($hexString)
+    {
         $length = strlen($hexString);
         $binString = "";
         $count = 0;
@@ -238,5 +262,5 @@ class Helpers {
         }
         return $binString;
     }
-    
+
 }

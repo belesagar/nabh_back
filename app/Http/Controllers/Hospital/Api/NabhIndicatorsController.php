@@ -140,16 +140,16 @@ class NabhIndicatorsController extends Controller
         $all_form_name_array = [];
 
         $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
-            "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type")->with([
+            "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type",
+            'priority')->with([
             'getValidations' => function ($query) {
                 $query->select('form_id', 'validations');
             }
         ])->where([
             ['indicators_ids', 'like', '%' . $postdata['indicator_id'] . '%'],
             ['status', 'ACTIVE']
-        ])->get()->toArray();
-
-
+        ])->orderBy('priority', 'asc')->get()->toArray();
+//        dd($indicator_data);
         foreach ($indicator_data as $key => $value) {
             if ($value['handle_type'] == "" || $value['handle_type'] == "outside") {
                 $value['validation'] = [];
@@ -203,16 +203,24 @@ class NabhIndicatorsController extends Controller
                 if ($value['data_show_type'] == "time_select") {
                     $time_select_array = ["00:30" => "00:30"];
 
-                    $value["data_value"] = $time_select_array;
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($time_select_array);
                 }
                 if ($value['data_show_type'] == "yesno") {
-                    $value["data_value"] = array("Yes" => "Yes", "No" => "No");
+                    $yesno_array = array("Yes" => "Yes", "No" => "No");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
                 }
                 if ($value['data_show_type'] == "rate1to5") {
-                    $value["data_value"] = array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5");
+                    $rate1to5_array = array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5");
+                    $value["data_value"] = $rate1to5_array;
                 }
                 if ($value['data_show_type'] == "source_of_information") {
-                    $value["data_value"] = array("OLD PATIENT" => "OLD PATIENT", "PRACTO" => "PRACTO", "REF. DOCTORS" => "REF. DOCTORS", "OTHER" => "OTHER");
+                    $source_array = array(
+                        "OLD PATIENT" => "OLD PATIENT",
+                        "PRACTO" => "PRACTO",
+                        "REF. DOCTORS" => "REF. DOCTORS",
+                        "OTHER" => "OTHER"
+                    );
+                    $value["data_value"] = $source_array;
                 }
                 $indicators_input[] = $value;
                 $form_name_array[] = $value['input_name'];
