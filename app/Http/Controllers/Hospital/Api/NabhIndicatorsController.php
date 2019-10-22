@@ -209,6 +209,74 @@ class NabhIndicatorsController extends Controller
                     $yesno_array = array("Yes" => "Yes", "No" => "No");
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
                 }
+
+                if ($value['data_show_type'] == "on_off_select") {
+                    $yesno_array = array("On" => "On", "Off" => "Off");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "yesnonotknown") {
+                    $yesno_array = array("Yes" => "Yes", "No" => "No", "Not Known" => "Not Known");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "injury_select") {
+                    $yesno_array = array("Superficial" => "Superficial", "Deep" => "Deep");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "usednotused") {
+                    $yesno_array = array("Used" => "Used", "Not Used" => "Not Used");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+                
+                if ($value['data_show_type'] == "no_counter_select") {
+                    $yesno_array = array(
+                        "1" => "1", 
+                        "2" => "2",
+                        "3" => "3",
+                        "4" => "4",
+                        "5" => "5",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "work_time_period") {
+                    $data_array = array(
+                        "LESS THAN ONE MONTH" => "LESS THAN ONE MONTH", 
+                        "LESS THAN 6 MONTHS" => "LESS THAN 6 MONTHS",
+                        "MORE THAN 6 MONTHS" => "MORE THAN 6 MONTHS",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($data_array);
+                }
+                
+
+                if ($value['data_show_type'] == "test_advice_select") {
+                    $yesno_array = array(
+                        "HEMOGRAM" => "HEMOGRAM", 
+                        "SR BILIRUBIN" => "SR BILIRUBIN",
+                        "SR ELECTROLYTES" => "SR ELECTROLYTES",
+                        "SR CREATININE" => "SR CREATININE",
+                        "CRP" => "CRP",
+                        "PS FOR MP" => "PS FOR MP",
+                        "Bsl random" => "Bsl random",
+                        "Other" => "Other",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "cause_of_injury") {
+                    $data_array = array(
+                        "SOMEONE PUSH YOU" => "SOMEONE PUSH YOU", 
+                        "WHILE OPENING THE SHARP" => "WHILE OPENING THE SHARP", 
+                        "WHILE RECAPPING THE SHARP" => "WHILE RECAPPING THE SHARP", 
+                        "WHILE GIVING THE SHARP TO ANOTHER PERSON" => "WHILE GIVING THE SHARP TO ANOTHER PERSON", 
+                        "WHILE CUTTING THE NEEDLE" => "WHILE CUTTING THE NEEDLE", 
+                        "OTHER" => "OTHER"
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($data_array);
+                }
+                
                 if ($value['data_show_type'] == "rate1to5") {
                     $rate1to5_array = array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5");
                     $value["data_value"] = $rate1to5_array;
@@ -307,7 +375,8 @@ class NabhIndicatorsController extends Controller
         $indicator_id = $request_data['indicator_id'];
 
         $return = $this->getIndicatorColumns($indicator_id);
-//        if ($return['success']) {
+       if ($return['success']) {
+        if (!empty($return['data']['column_data'])) {
         $indicators_columns = [];
         if (isset($request_data['type']) && $request_data['type'] == "excel") {
             $indicators_columns[] = "indicators_unique_id";
@@ -341,9 +410,12 @@ class NabhIndicatorsController extends Controller
         } else {
             $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
         }
-//        } else {
-//            $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
-//        }
+        } else {
+           $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
+       }
+       } else {
+           $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
+       }
 
         return response()->json($return);
     }
@@ -512,6 +584,7 @@ class NabhIndicatorsController extends Controller
     private function getIndicatorColumns($indicator_id = 0)
     {
         if ($indicator_id > 0) {
+            $columns = [];
             $indicator_data = $this->indicators_forms_fields->select("form_name as input_name", "label")->where([
                 ['indicators_ids', 'like', '%' . $indicator_id . '%'],
                 ['status', 'ACTIVE']
