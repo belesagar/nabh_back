@@ -147,7 +147,8 @@ Route::group(['middleware' => ['Cors']], function () {
             Route::post('patient/getinfo', 'HospitalPatientController@getInfo');
 
             //Virtual Hospital
-            Route::post('virtual/hospital', 'HospitalPatientController@Add');
+            Route::post('virtual/hospital', 'VirtualHospitalController@addVirtualHospitalData');
+            Route::get('virtual/data', 'VirtualHospitalController@getVirtualHospitalData');
             
         });
 	});
