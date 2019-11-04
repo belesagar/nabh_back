@@ -146,6 +146,9 @@ Route::group(['middleware' => ['Cors']], function () {
             Route::post('patient/editdata', 'HospitalPatientController@Edit');
             Route::post('patient/getinfo', 'HospitalPatientController@getInfo');
 
+            //Virtual Hospital
+            Route::post('virtual/hospital', 'HospitalPatientController@Add');
+            
         });
 	});
 
