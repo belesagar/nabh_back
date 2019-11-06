@@ -154,7 +154,7 @@ class NabhIndicatorsController extends Controller
 
         $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
             "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type",
-            'priority')->with([
+            'priority','form_group')->with([
             'getValidations' => function ($query) {
                 $query->select('form_id', 'validations');
             }
@@ -243,6 +243,60 @@ class NabhIndicatorsController extends Controller
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
                 }
                 
+                if ($value['data_show_type'] == "product_select") {
+                    $yesno_array = array("PCV" => "PCV", "FFP" => "FFP", "SDP" => "SDP", "RDP" => "RDP");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "root_cause") {
+                    $yesno_array = array(
+                        "WRONG DRUG WRONG PATIENT" => "WRONG DRUG WRONG PATIENT", 
+                        "WRONG DOSE" => "WRONG DOSE", 
+                        "WRONG ROUTE" => "WRONG ROUTE", 
+                        "WRONG TIME" => "WRONG TIME",
+                        "WRONG ROUTE OF ADMINISTRATION" => "WRONG ROUTE OF ADMINISTRATION",
+                        "DRUG INTERACTION" => "DRUG INTERACTION",
+                        "FOOD DRUG INTERACTION" => "FOOD DRUG INTERACTION",
+                        "ALLERGY" => "ALLERGY",
+                        "ANY OTHER" => "ANY OTHER",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "ward_name") {
+                    $yesno_array = array(
+                        "SEMIPRIVATE ROOM" => "SEMIPRIVATE ROOM", 
+                        "GENERAL MALE WARD" => "GENERAL MALE WARD", 
+                        "GENERAL FEMALE WARD" => "GENERAL FEMALE WARD", 
+                        "SEMIPRIVATE ROOM" => "SEMIPRIVATE ROOM",
+                        "DELUX ROOM" => "DELUX ROOM",
+                        "SUPER DELUX ROOM" => "SUPER DELUX ROOM",
+                        "ICU" => "ICU",
+                        "NICU" => "NICU",
+                        "EMERGENCY ROOM" => "EMERGENCY ROOM",
+                        "RECOVERY ROOM" => "RECOVERY ROOM",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "final_outcome_of_adr") {
+                    $yesno_array = array(
+                        "PATIENT DIED" => "PATIENT DIED", 
+                        "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS" => "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS", 
+                        "PATIENT SUFFERED PERMENANT HARM" => "PATIENT SUFFERED PERMENANT HARM", 
+                        "PATIENT SUFFERED FROM TEMPORARY HARM AND NEEDED INITIAL OR PROLONGED HOSPITALIZATION" => "PATIENT SUFFERED FROM TEMPORARY HARM AND NEEDED INITIAL OR PROLONGED HOSPITALIZATION",
+                        "PATIENT SUFFERED FROM TEMPORARY HARM THAT NEEDED INTERVENTION" => "PATIENT SUFFERED FROM TEMPORARY HARM THAT NEEDED INTERVENTION",
+                        "PATIENT NEEDED MONITORING OR TEMPORARY  INTERVENTION TO PRECLUDE HARM" => "PATIENT NEEDED MONITORING OR TEMPORARY  INTERVENTION TO PRECLUDE HARM",
+                        "PATIENT SUFFERED NO HARM" => "PATIENT SUFFERED NO HARM",
+                    );
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
+                if ($value['data_show_type'] == "blood_group") {
+                    $yesno_array = array("A POSITIVE" => "A POSITIVE", "B POSITIVE" => "B POSITIVE", "AB POSITIVE" => "AB POSITIVE", "O POSITIVE" => "O POSITIVE", "A NEGATIVE" => "A NEGATIVE", "B NEGATIVE" => "B NEGATIVE", "AB NEGATIVE" => "AB NEGATIVE", "O NEGATIVE" => "O NEGATIVE");
+                    $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
+                }
+
                 if ($value['data_show_type'] == "no_counter_select") {
                     $yesno_array = array(
                         "1" => "1", 
@@ -303,9 +357,21 @@ class NabhIndicatorsController extends Controller
                     );
                     $value["data_value"] = $source_array;
                 }
+                $value['is_form_group'] = 0;
+                if($value['form_group'] != "")
+                {
+                    $form_group = json_decode($value['form_group'],true);
+                    $value['form_group'] = $form_group;
+                    $value['is_form_group'] = 1;
+                    foreach ($form_group as $form_group_value) {
+                        $value['form_group_lable'][] = $form_group_value;
+                    }
+                }
+
                 $indicators_input[] = $value;
                 $form_name_array[] = $value['input_name'];
             }
+
             $all_form_name_array[] = $value;
         }
         $data = [
@@ -331,6 +397,11 @@ class NabhIndicatorsController extends Controller
         foreach ($formdata['all_form_name_array'] as $form_data) {
             if ($form_data['handle_type'] == "inside") {
                 $insert_data[$form_data['input_name']] = $this->hospital_user_id;
+            }
+
+            if($form_data['form_group'] != "")
+            {
+                $insert_data[$form_data['input_name']] = json_encode($insert_data[$form_data['input_name']]);
             }
         }
 
