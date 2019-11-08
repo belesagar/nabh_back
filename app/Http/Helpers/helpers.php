@@ -263,4 +263,10 @@ class Helpers
         return $binString;
     }
 
+    public static function filterData($request_data)
+    {
+        
+        return $binString;
+    }
+
 }
