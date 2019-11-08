@@ -20,8 +20,51 @@ class HospitalUsersController extends Controller
 
     public function List(Request $request)
     {
-        $list = $this->hospital_users->where("hospital_id", $this->payload['hospital_id'])->orderBy('created_at',
-            'desc')->get()->toArray();
+        $where = [["hospital_id", $this->hospital_id]];
+        $request_data = $request->all();
+
+        $where[] = ['status',$request_data['status']];
+
+        //Filter option
+        if(isset($request_data['search_string']) && $request_data['search_string'] != "")
+        {
+            $search_key = $request_data['search_key'];
+            $search_string = $request_data['search_string'];
+
+            if($search_key == "name")
+            {
+                $where[] = ['name','like','%'.$search_string.'%'];
+            }
+            if($search_key == "email")
+            {
+                $where[] = ['email',$search_string];
+            }
+            if($search_key == "mobile")
+            {
+                $where[] = ['mobile',$search_string];
+            }
+        }
+
+        $offset = 0;
+        $limit = 10;
+
+        if(isset($request_data['offset']) && !empty($request_data['offset']))
+        {
+            $offset = $request_data['offset'];
+            if($offset > 1)
+            {
+                $offset = (($offset-1)*10)-1;
+            }else{
+                $offset = 0;
+            }
+        }
+
+        $list = $this->hospital_users->where($where)
+        ->orderBy('created_at','desc')
+        ->offset($offset)
+        ->limit($limit)
+        ->get()
+        ->toArray();
         $data = array("list" => $list);
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         return json_encode($return);

@@ -154,7 +154,7 @@ class NabhIndicatorsController extends Controller
 
         $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
             "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type",
-            'priority','form_group')->with([
+            'priority','form_group','input_hide_id')->with([
             'getValidations' => function ($query) {
                 $query->select('form_id', 'validations');
             }
@@ -178,7 +178,7 @@ class NabhIndicatorsController extends Controller
                     }
 
                 }
-                unset($value['form_id']);
+                // unset($value['form_id']);
                 unset($value['get_validations']);
 
                 $value["data"] = "";
@@ -368,6 +368,13 @@ class NabhIndicatorsController extends Controller
                     }
                 }
 
+                //This for adding hide for name
+                $value['input_hide_id_status'] = 1;
+                // if($value['input_hide_id'] != "")
+                // {
+                //     $value['input_hide_id_status'] = 0;
+                // }
+
                 $indicators_input[] = $value;
                 $form_name_array[] = $value['input_name'];
             }
@@ -441,11 +448,16 @@ class NabhIndicatorsController extends Controller
             'email')->where('status', 'ACTIVE')
             ->where('hospital_id', $this->hospital_id)
             ->get();
+
         if ($hospital_data[0]['email'] == $this->payload['email']) {
-            $indicators_list = $this->assign_indicators->with('indicators')->where("hospital_id",
-                $this->hospital_id)->get();
+            $indicators_list = $this->assign_indicators->with(['indicators' => function($query){
+                $query->where('status', "ACTIVE");
+            }])->where("hospital_id",$this->hospital_id)->get();
+            
         } else {
-            $indicators_list = $this->hospital_users_indicators->with('indicators')->where("hospital_id",
+            $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
+                $query->where('status', "ACTIVE");
+            }])->where("hospital_id",
                 $this->hospital_id)->where("hospital_user_id", $this->hospital_user_id)->get();
         }
         $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $indicators_list);

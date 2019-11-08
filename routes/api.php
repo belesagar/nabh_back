@@ -109,7 +109,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::get('indicatorlist', 'NabhIndicatorsController@indicatorsList');
 
 			//Hospital Users
-			Route::get('users/getlist', 'HospitalUsersController@List');
+			Route::post('users/getlist', 'HospitalUsersController@List');
 			Route::post('users/adddata', 'HospitalUsersController@Add');
 			Route::post('users/editdata', 'HospitalUsersController@Edit');
             Route::post('profile/change-password', 'HospitalUsersController@changePassword');
@@ -127,7 +127,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
 
 			//Doctors Route
-			Route::get('doctors/getlist', 'DoctorsController@List');
+			Route::post('doctors/getlist', 'DoctorsController@List');
 			Route::post('doctor/adddata', 'DoctorsController@Add');
 			Route::post('doctor/editdata', 'DoctorsController@Edit');
 			Route::post('doctor/getinfo', 'DoctorsController@getInfo');
@@ -141,7 +141,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('payment/check', 'HospitalTransactionController@checkPayment');
 
             //Patient
-            Route::get('patient/list', 'HospitalPatientController@List');
+            Route::post('patient/list', 'HospitalPatientController@List');
             Route::post('patient/adddata', 'HospitalPatientController@Add');
             Route::post('patient/editdata', 'HospitalPatientController@Edit');
             Route::post('patient/getinfo', 'HospitalPatientController@getInfo');
