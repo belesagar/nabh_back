@@ -96,6 +96,9 @@ Route::group(['middleware' => ['Cors']], function () {
 
 			Route::post('registration', 'HospitalRegistrationController@addHospitalData');
 
+			//Hospital Info
+			Route::get('info', 'HospitalRegistrationController@getInfo');
+
 			//For adding and updating indicators data
 			Route::post('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
 			Route::post('saveindicatorsdata', 'NabhIndicatorsController@savendicatorsData');

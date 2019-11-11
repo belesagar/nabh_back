@@ -14,9 +14,9 @@ class HospitalRegistrationController extends Controller
     {
         $this->hospital_registration = new HospitalRegistration();
         $this->hospital_users = new HospitalUsers();
-
-        // $this->payload = auth('hospital_api')->user();
-        // dd($this->payload);
+        $this->payload = auth('hospital_api')->user();
+        $this->hospital_id = $this->payload['hospital_id'];
+        $this->hospital_user_id = $this->payload['hospital_user_id'];
     }
 
     public function addHospitalData(Request $request)
@@ -105,4 +105,20 @@ class HospitalRegistrationController extends Controller
         }
         return json_encode($return);
     }
+
+    public function getInfo(Request $request)
+    {
+        $data = $this->hospital_registration->where("hospital_id", $this->hospital_id)->where("status", "ACTIVE")->first();
+       
+        if (!empty($data)) {
+            $data = array("data_info" => $data);
+            $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+        } else {
+            $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
+        }
+
+
+        return json_encode($return);
+    }
+
 }
