@@ -11,7 +11,7 @@ class HospitalPatientController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->hospital_patient = new HospitalPatient();
+        $this->hospital_patient = new HospitalPatient(); 
         $this->virtual_hospital = new VirtualHospital();
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -23,6 +23,8 @@ class HospitalPatientController extends Controller
     {
         $where = [["hospital_id", $this->hospital_id]];
         
+        $data_count = $this->hospital_patient->where($where)->count();
+
         $request_data = $request->all();
 
         $where[] = ['status',$request_data['status']];
@@ -73,6 +75,9 @@ class HospitalPatientController extends Controller
         ->toArray();
         
         $data = array("list" => $list);
+
+        $data['data_count'] = $data_count;
+        
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         return json_encode($return);
     }

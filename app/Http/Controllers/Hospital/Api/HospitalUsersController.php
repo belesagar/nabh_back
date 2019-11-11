@@ -21,6 +21,9 @@ class HospitalUsersController extends Controller
     public function List(Request $request)
     {
         $where = [["hospital_id", $this->hospital_id]];
+
+        $data_count = $this->hospital_users->where($where)->count();
+
         $request_data = $request->all();
 
         $where[] = ['status',$request_data['status']];
@@ -66,6 +69,9 @@ class HospitalUsersController extends Controller
         ->get()
         ->toArray();
         $data = array("list" => $list);
+
+        $data['data_count'] = $data_count;
+
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         return json_encode($return);
     }
