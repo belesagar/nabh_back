@@ -109,7 +109,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('update/indicatorsdata', 'NabhIndicatorsController@updateIndicatorFormData');
 
 			//Indicator List
-			Route::get('indicatorlist', 'NabhIndicatorsController@indicatorsList');
+			Route::post('indicatorlist', 'NabhIndicatorsController@indicatorsList');
 
 			//Hospital Users
 			Route::post('users/getlist', 'HospitalUsersController@List');
