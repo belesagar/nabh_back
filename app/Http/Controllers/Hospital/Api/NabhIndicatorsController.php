@@ -42,7 +42,24 @@ class NabhIndicatorsController extends Controller
 
     public function indicatorsList(Request $request)
     {
-        $list = $this->nabh_indicators->where('status', 'ACTIVE')->get()->toArray();
+        // \DB::enableQueryLog();
+        $request_data = $request->all();
+        $where = ['status' => 'ACTIVE'];
+        if(isset($request_data['search_indicators']) && $request_data['search_indicators'] != "")
+        {
+            // $where = ['indicators_id' => $request_data['search_indicators']];
+            $where[] = ['name','like','%'.$request_data['search_indicators'].'%'];
+        }
+
+        $list = $this->nabh_indicators->where($where)
+        ->get()
+        ->toArray();
+//         $query = \DB::getQueryLog();
+
+// $query = end($query);
+
+// print_r($query);
+// exit;
         $data = array("list" => $list);
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         return json_encode($return);
@@ -64,6 +81,9 @@ class NabhIndicatorsController extends Controller
         } else {
             $request_data = $request->all();
 
+            //Indicators Details
+            $indicators_details = $this->getIndicatorsDetail($request_data['indicator_id']);
+           
             $formdata = $this->getFormField($request_data);
 
             /* $indicators_input = [];
@@ -139,7 +159,8 @@ class NabhIndicatorsController extends Controller
                 "info" => "",
                 "data" => [
                     "indicators_input" => $formdata['indicators_input'],
-                    "form_name_array" => $formdata['form_name_array']
+                    "form_name_array" => $formdata['form_name_array'],
+                    "indicators_details" => !empty($indicators_details)?$indicators_details[0]:[],
                 ]
             );
         }
@@ -464,11 +485,28 @@ class NabhIndicatorsController extends Controller
         return response()->json($return);
     }
 
+    public function getIndicatorsDetail($indicator_id = "")
+    {
+        $where = ["status" => "ACTIVE"];
+        if($indicator_id != "")
+        {
+            $where['indicators_id'] = $indicator_id;
+        }
+        $indicators_details = $this->nabh_indicators->where($where)->get();
+        
+        return $indicators_details;
+    }
+
     public function getIndicatorFormDataList(Request $request)
     {
         $request_data = $request->all();
         $hospital_id = $this->payload['hospital_id'];
         $indicator_id = $request_data['indicator_id'];
+        $data = [];
+
+        $indicators_details = $this->getIndicatorsDetail($indicator_id);
+        $data['indicators_details'] = !empty($indicators_details)?$indicators_details[0]:[];
+       
 
         $return = $this->getIndicatorColumns($indicator_id);
        if ($return['success']) {
@@ -484,7 +522,7 @@ class NabhIndicatorsController extends Controller
 
         $indicator_data = $this->indicators_data->select($indicators_columns)->where('hospital_id',
             $hospital_id)->where('indicators_id', $indicator_id)->orderBy('created_at', 'desc')->get();
-        $data = [];
+        
         if (count($indicator_data) > 0) {
             //This for download excel
             if (isset($request_data['type']) && $request_data['type'] == "excel") {
@@ -496,11 +534,11 @@ class NabhIndicatorsController extends Controller
                 //Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
                 $file_url = Storage::url('hospital/excel/' . $file_name);
 
-                $data = ["file_url" => $file_url];
+                $data['file_url'] = $file_url;
 
             } else {
 
-                $data = ["list_data" => $indicator_data];
+                $data['list_data'] = $indicator_data;
             }
             $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
         } else {
@@ -518,60 +556,113 @@ class NabhIndicatorsController extends Controller
 
     public function ListofAcceptIndicators(Request $request)
     {
-        $list = $this->assign_indicators->select("indicators_id")->where([
-            ['status', 'ACTIVE'],
-            ['hospital_id', $this->hospital_id]
-        ])->get()->toArray();
+        $list = $this->assign_indicators->select("assign_indicators.indicators_id")
+        ->where([
+            ['assign_indicators.status', 'ACTIVE'],
+            ['ni.status', 'ACTIVE'],
+            ['assign_indicators.hospital_id', $this->hospital_id]
+        ])
+        ->join('nabh_indicators as ni', 'ni.indicators_id', '=', 'assign_indicators.indicators_id')
+        ->get()
+        ->toArray();
         $data = array("list" => $list);
+
+
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         return json_encode($return);
     }
 
     public function AcceptIndicators(Request $request)
     {
-        $request_data = $request->all();
-        $selected_indicators = [];
-        $check_indicator_selection = true;
-        foreach ($request_data as $key => $value) {
-            if ($value != "") {
-                $check_indicator_selection = false;
-                $selected_indicators[] = $key;
-            }
-        }
+        $validator = \Validator::make($request->all(), [
+            'indicator_id' => 'required|numeric',
+            'is_add' => 'required'
+        ]);
 
-        if ($check_indicator_selection) {
-            $return = array("success" => false, "error_code" => 1, "info" => "Please Select the indicators.");
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
-            $insert_data_array = [];
-            foreach ($selected_indicators as $indicators_value) {
-                $check_indicators_availability = $this->assign_indicators->where([
+            $request_data = $request->all();
+            extract($request_data);
+
+            $check_indicator_availability = $this->assign_indicators->where([
                     ['hospital_id', $this->hospital_id],
-                    ["indicators_id", $indicators_value]
-                ])->get();
-                if (count($check_indicators_availability) == 0) {
-                    $insert_data_array[] = array(
+                    ["indicators_id", $indicator_id]
+            ])->first();
+            
+            if(empty($check_indicator_availability))
+            {
+                if($is_add)
+                {
+                    $insert_data_array = array(
                         "hospital_id" => $this->hospital_id,
-                        "indicators_id" => $indicators_value,
+                        "indicators_id" => $indicator_id,
                     );
+                    $response_id = $this->assign_indicators->insert($insert_data_array);  
                 }
-            }
-
-            if (count($insert_data_array) > 0) {
-                $response_id = $this->assign_indicators->insert($insert_data_array);
-                if ($response_id > 0) {
-                    $return = array("success" => true, "error_code" => 0, "info" => "Indicators Added Successfully.");
-                } else {
-                    $return = array(
-                        "success" => false,
-                        "error_code" => 1,
-                        "info" => "Something is wrong, Please try again."
-                    );
+            }else{
+                if($is_add)
+                {
+                    $updated_data = ['status' => 'ACTIVE'];
+                }else{
+                    $updated_data = ['status' => 'INACTIVE'];
                 }
-            } else {
-                $return = array("success" => true, "error_code" => 0, "info" => "Indicators Added Successfully.");
+                $response = $this->assign_indicators->where([
+                    ['hospital_id', $this->hospital_id],
+                    ["indicators_id", $indicator_id]
+                ])->update($updated_data);
             }
-
+            $return = array("success" => true, "error_code" => 0, "info" => "Operation Successfully Done");
         }
+        
+        // $selected_indicators = [];
+        // $check_indicator_selection = true;
+        // foreach ($request_data as $key => $value) {
+        //     if ($value != "") {
+        //         $check_indicator_selection = false;
+        //         $selected_indicators[] = $key;
+        //     }
+        // }
+
+        // if ($check_indicator_selection) {
+        //     $return = array("success" => false, "error_code" => 1, "info" => "Please Select the indicators.");
+        // } else {
+        //     $insert_data_array = [];
+        //     foreach ($selected_indicators as $indicators_value) {
+        //         $check_indicators_availability = $this->assign_indicators->where([
+        //             ['hospital_id', $this->hospital_id],
+        //             ["indicators_id", $indicators_value]
+        //         ])->get();
+        //         if (count($check_indicators_availability) == 0) {
+        //             $insert_data_array[] = array(
+        //                 "hospital_id" => $this->hospital_id,
+        //                 "indicators_id" => $indicators_value,
+        //             );
+        //         }
+        //     }
+
+        //     if (count($insert_data_array) > 0) {
+        //         $response_id = $this->assign_indicators->insert($insert_data_array);
+        //         if ($response_id > 0) {
+        //             $return = array("success" => true, "error_code" => 0, "info" => "Indicators Added Successfully.");
+        //         } else {
+        //             $return = array(
+        //                 "success" => false,
+        //                 "error_code" => 1,
+        //                 "info" => "Something is wrong, Please try again."
+        //             );
+        //         }
+        //     } else {
+        //         $return = array("success" => true, "error_code" => 0, "info" => "Indicators Added Successfully.");
+        //     }
+
+        // }
+
         return json_encode($return);
     }
 
