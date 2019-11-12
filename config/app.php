@@ -175,7 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\HelperServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+        //Maatwebsite\Excel\ExcelServiceProvider::class,
     ],
 
     /*
@@ -231,7 +231,7 @@ return [
         'Helper' => App\Http\Helpers\helpers::class,
         'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
-        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        //'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];
