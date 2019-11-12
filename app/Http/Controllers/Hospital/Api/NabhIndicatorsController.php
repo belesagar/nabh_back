@@ -493,7 +493,7 @@ class NabhIndicatorsController extends Controller
 
                 $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
 
-                Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
+                //Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
                 $file_url = Storage::url('hospital/excel/' . $file_name);
 
                 $data = ["file_url" => $file_url];
