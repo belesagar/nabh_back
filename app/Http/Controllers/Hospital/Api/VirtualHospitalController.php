@@ -34,6 +34,7 @@ class VirtualHospitalController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'floor_count' => 'required|numeric',
+            'hospital_area' => 'required',
             'official_email' => 'required|email',
         ]);
 
