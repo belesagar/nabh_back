@@ -15,13 +15,16 @@ use App\Model\IndicatorsFormsFieldsValidations;
 use App\Model\HospitalDoctors;
 use App\Model\HospitalPatient;
 use App\Model\HospitalOtInformation;
-// use Maatwebsite\Excel\Facades\Excel;
-// use App\Http\Controllers\Excel\DataExportController;
+use App\Repositories\VirtualHospitalAssetDataRepository;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Excel\DataExportController;
 use Illuminate\Support\Facades\Storage;
 
 class NabhIndicatorsController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository
+    )
     {
         $this->indicators_data = new IndicatorsData();
         $this->indicators_data_history = new IndicatorsDataHistory();
@@ -34,6 +37,8 @@ class NabhIndicatorsController extends Controller
         $this->hospital_doctors = new HospitalDoctors();
         $this->hospital_patient = new HospitalPatient();
         $this->hospital_ot_information = new HospitalOtInformation();
+
+        $this->virtual_hospital_asset_data_repository = $virtual_hospital_asset_data_repository;
 
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -216,12 +221,15 @@ class NabhIndicatorsController extends Controller
                     $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list, 'doctor_id', 'name');
                 }
                 if ($value['data_show_type'] == "ot") {
-                    $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
-                        ["hospital_id", $this->hospital_id],
-                        ["status", "ACTIVE"]
-                    ])->get()->toArray();
+                    $asset_array = ["hospital_id" => $this->hospital_id,"type" => "OT"];
+                    $ot_data = $this->virtual_hospital_asset_data_repository->getFloorAssetData($asset_array);
 
-                    $value["data_value"] = \Helpers::convertKeyValuePair($ot_list, 'ot_id', 'ot_name');
+                    // $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
+                    //     ["hospital_id", $this->hospital_id],
+                    //     ["status", "ACTIVE"]
+                    // ])->get()->toArray();
+
+                    $value["data_value"] = \Helpers::convertKeyValuePair($ot_data, 'name', 'name');
                 }
 
                 if ($value['data_show_type'] == "patient") {
@@ -531,7 +539,7 @@ class NabhIndicatorsController extends Controller
 
                 $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
 
-                //Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
+                Excel::store(new DataExportController($excel_data), "public/hospital/excel/" . $file_name);
                 $file_url = Storage::url('hospital/excel/' . $file_name);
 
                 $data['file_url'] = $file_url;

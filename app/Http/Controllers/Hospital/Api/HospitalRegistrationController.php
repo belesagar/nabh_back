@@ -72,6 +72,7 @@ class HospitalRegistrationController extends Controller
                     "mobile" => $request_data['mobile'],
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
+                    "role_id" => 1,
                 );
 
                 $user_response = $this->hospital_users->create($userdata);
