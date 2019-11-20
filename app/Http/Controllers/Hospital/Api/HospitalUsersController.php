@@ -79,11 +79,28 @@ class HospitalUsersController extends Controller
     public function getInfo(Request $request)
     {
         $request_data = $request->all();
-        $user_data = $this->hospital_users->select("user_unique_id", "name", "email", "mobile", "city", "state", "role_id", "status", "address")->where('hospital_user_id',
+        $user_data = $this->hospital_users->select("user_unique_id", "name", "email", "mobile", "city", "state", "role_id", "status", "address", "dob", "designation")->where('hospital_user_id',
             $this->hospital_user_id)->where("hospital_id", $this->hospital_id)
             ->get();
         if (count($user_data) == 1) {
             $data = array("user_data" => $user_data[0]);
+            $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+        } else {
+            $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
+        }
+
+
+        return json_encode($return);
+    }
+
+    public function getUserInfo(Request $request)
+    {
+        $request_data = $request->all();
+        $user_data = $this->hospital_users->select("user_unique_id", "name", "email", "mobile", "city", "state", "role_id", "status", "address", "dob", "designation")->where('hospital_user_id',
+            $request_data['user_id'])->where("hospital_id", $this->hospital_id)
+            ->first();
+        if (!empty($user_data)) {
+            $data = array("user_data" => $user_data);
             $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
         } else {
             $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
@@ -101,6 +118,8 @@ class HospitalUsersController extends Controller
             'mobile' => 'required|unique:hospital_users,mobile',
             'password' => 'required|same:cpassword',
             'cpassword' => 'required',
+            'dob' => 'required',
+            'designation' => 'required',
             'city' => 'required',
             'state' => 'required',
             'address' => 'required',
@@ -126,6 +145,8 @@ class HospitalUsersController extends Controller
                     "email" => $request_data['email'],
                     "password" => md5($request_data['password']),
                     "mobile" => $request_data['mobile'],
+                    "dob" => date("Y-m-d",strtotime($request_data['dob'])),
+                    "designation" => $request_data['designation'],
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
                     "address" => $request_data['address'],
@@ -146,7 +167,7 @@ class HospitalUsersController extends Controller
             } else {
                 $return = array(
                     "success" => false,
-                    "error_code" => 1,
+                    "error_code" => 2,
                     "info" => "Something is wrong, please try again."
                 );
             }
@@ -163,6 +184,8 @@ class HospitalUsersController extends Controller
             'mobile' => 'required',
             'city' => 'required',
             'password' => 'same:cpassword',
+            'dob' => 'required',
+            'designation' => 'required',
             'state' => 'required',
             'address' => 'required',
             'status' => 'required',
@@ -210,6 +233,8 @@ class HospitalUsersController extends Controller
                     "name" => $request_data['name'],
                     "email" => $request_data['email'],
                     "mobile" => $request_data['mobile'],
+                    "dob" => date("Y-m-d",strtotime($request_data['dob'])),
+                    "designation" => $request_data['designation'],
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
                     "address" => $request_data['address'],

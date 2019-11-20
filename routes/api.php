@@ -116,7 +116,8 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::post('users/adddata', 'HospitalUsersController@Add');
 			Route::post('users/editdata', 'HospitalUsersController@Edit');
             Route::post('profile/change-password', 'HospitalUsersController@changePassword');
-            Route::get('users/getinfo', 'HospitalUsersController@getInfo');
+            Route::post('users/getinfo', 'HospitalUsersController@getUserInfo');
+            Route::get('users/profile-data', 'HospitalUsersController@getInfo');
             Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
             Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
 			Route::match(['get', 'post'],'user/permission/{id}', 'HospitalUsersController@UserAssignIndicators');
@@ -152,6 +153,9 @@ Route::group(['middleware' => ['Cors']], function () {
             //Virtual Hospital
             Route::post('virtual/hospital', 'VirtualHospitalController@addVirtualHospitalData');
             Route::get('virtual/data', 'VirtualHospitalController@getVirtualHospitalData');
+            Route::get('virtual/floor-data', 'VirtualHospitalController@getVirtualHospitalFloorData');
+            Route::post('virtual/add-floor-data', 'VirtualHospitalController@addVirtualfloorData');
+            Route::post('virtual/get-floor-data', 'VirtualHospitalController@getfloorDataByFloorNumber');
             
         });
 	});
