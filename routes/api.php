@@ -102,7 +102,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			//For adding and updating indicators data
 			Route::post('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
 			Route::post('saveindicatorsdata', 'NabhIndicatorsController@savendicatorsData');
-			Route::get('getindicatorlist', 'NabhIndicatorsController@getIndicatorsList');
+			Route::post('getindicatorlist', 'NabhIndicatorsController@getIndicatorsList');
 			Route::post('getindicatordata', 'NabhIndicatorsController@getIndicatorFormDataList');
 			Route::post('indicator/formdata', 'NabhIndicatorsController@getIndicatorFormData');
 			Route::post('indicator/formdata/details', 'NabhIndicatorsController@getIndicatorFormDataDetails');

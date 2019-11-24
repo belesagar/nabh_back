@@ -8,9 +8,9 @@ class VirtualHospitalRepository
 {
     protected $model;
 
-    public function __construct(VirtualHospital $virtual_hospital)
+    public function __construct(VirtualHospital $model_name)
     {
-        $this->model = $virtual_hospital;
+        $this->model = $model_name;
     }
 
     public function create($params)
