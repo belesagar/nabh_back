@@ -20,6 +20,7 @@ Route::namespace('Admin')->group(function () {
     Route::prefix('admin')->group(function () {
         //This is login route
         Route::get('downloadexcel', 'AuthController@downloadExcel');
+        Route::get('downloadpdf', 'AuthController@downloadPdf');
         Route::get('login', 'AuthController@login')->name('admin.login');
         Route::get('signup', 'AuthController@signup')->name('admin.signup');
         Route::get('forgot_password', 'AuthController@forgot_password')->name('admin.forgot_password');

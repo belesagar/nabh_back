@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Model\VirtualHospitalData;
+use App\Model\NabhIndicators;
 
-class VirtualHospitalDataRepository
+class NabhIndicatorsRepository
 {
     protected $model;
 
-    public function __construct(VirtualHospitalData $model_name)
+    public function __construct(NabhIndicators $model_name)
     {
         $this->model = $model_name;
     }
@@ -42,21 +42,13 @@ class VirtualHospitalDataRepository
         }
     }
 
-    public function getVitualFloorData($param)
+    public function getDataByCustomeWhere($param, $multiple = false)
     {
-        return $this->model->where([
-            ["hospital_id", $param['hospital_id']],
-            ["floor_no", $param['floor_no']],
-            ["virtual_hospital_id", $param['virtual_hospital_id']]
-        ])->first();
-    }
-
-    public function getVitualFloorDataByFloor($param)
-    {
-        return $this->model->where([
-            ["hospital_id", $param['hospital_id']],
-            ["floor_no", $param['floor_no']]
-        ])->first();
+        if ($multiple) {
+            return $this->model->where($param)->get();
+        } else {
+            return $this->model->where($param)->first();
+        }
     }
 
 }
