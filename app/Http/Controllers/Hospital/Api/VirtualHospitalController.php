@@ -129,7 +129,7 @@ class VirtualHospitalController extends Controller
         if(!empty($virtual_data))
         {
              $request_data = $request->all();
-
+             
              $current_floor = $request_data['floor_no'];
 
              $param = [
@@ -177,14 +177,14 @@ class VirtualHospitalController extends Controller
                 
                 foreach ($request_data['ot_data'] as $ot_value) {
                     $asset_data['name'] = $ot_value['name'];
-                    $asset_data['number_of_beds'] = $ot_value['no_of_bed'];
+                    $asset_data['number_of_beds'] = $ot_value['type'];
                     
                     $this->virtual_hospital_asset_data->insert($asset_data);
                 }
                 
              }  
 
-             if(count($request_data['opd_data']) > 0)
+            /* if(count($request_data['opd_data']) > 0)
              {  
                 $asset_data['type'] = "OPD";
 
@@ -207,7 +207,7 @@ class VirtualHospitalController extends Controller
                     $this->virtual_hospital_asset_data->insert($asset_data);
                 }
                 
-             } 
+             } */
 
              if($current_floor == $virtual_data['floor_count'])
              {

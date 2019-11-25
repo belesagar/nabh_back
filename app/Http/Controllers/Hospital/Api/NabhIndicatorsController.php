@@ -488,17 +488,22 @@ class NabhIndicatorsController extends Controller
             ->where('hospital_id', $this->hospital_id)
             ->get();
 
-        if ($hospital_data[0]['email'] == $this->payload['email']) {
-            $indicators_list = $this->assign_indicators->with(['indicators' => function($query){
-                $query->where('status', "ACTIVE");
-            }])->where("hospital_id",$this->hospital_id)->get();
+        // if ($hospital_data[0]['email'] == $this->payload['email']) {
+        //     $indicators_list = $this->assign_indicators->with(['indicators' => function($query){
+        //         $query->where('status', "ACTIVE");
+        //     }])->where("hospital_id",$this->hospital_id)->get();
             
-        } else {
+        // } else {
+            //\DB::enableQueryLog();
             $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
                 $query->where('status', "ACTIVE");
             }])->where("hospital_id",
-                $this->hospital_id)->where("hospital_user_id", $this->hospital_user_id)->get();
-        }
+                $this->hospital_id)->where("hospital_user_id", $this->hospital_user_id)->where("status", "ACTIVE")->get();
+            // $query = \DB::getQueryLog();
+
+            // print_r($query);
+            // exit;
+        // }
 
         $data = ["data_info" => $indicators_list];
 
@@ -597,7 +602,7 @@ class NabhIndicatorsController extends Controller
 
     public function ListofAcceptIndicators(Request $request)
     {
-        $list = $this->assign_indicators->select("assign_indicators.indicators_id")
+        $list = $this->assign_indicators->select("assign_indicators.indicators_id","ni.*")
         ->where([
             ['assign_indicators.status', 'ACTIVE'],
             ['ni.status', 'ACTIVE'],
@@ -607,6 +612,26 @@ class NabhIndicatorsController extends Controller
         ->get()
         ->toArray();
         $data = array("list" => $list);
+
+
+        $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+        return json_encode($return);
+    }
+
+    public function getHospitalUserIndicators(Request $request)
+    {
+        $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
+                $query->where('status', "ACTIVE");
+            }])
+            ->where([
+                ["hospital_users_indicators.hospital_id",$this->hospital_id],
+                ["hospital_users_indicators.hospital_user_id", $this->hospital_user_id],
+                ["hospital_users_indicators.status", "ACTIVE"],
+                ["ai.status", "ACTIVE"],
+            ])
+            ->join('assign_indicators as ai', 'ai.indicators_id', '=', 'hospital_users_indicators.indicator_id')
+            ->get();
+        $data = array("list" => $indicators_list);
 
 
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
@@ -657,6 +682,16 @@ class NabhIndicatorsController extends Controller
                     ['hospital_id', $this->hospital_id],
                     ["indicators_id", $indicator_id]
                 ])->update($updated_data);
+
+                if(!$is_add) //if inactive
+                {
+                    $response = $this->hospital_users_indicators->where([
+                        ['hospital_id', $this->hospital_id],
+                        ['hospital_user_id', $this->hospital_user_id],
+                        ["indicator_id", $indicator_id]
+                    ])->update($updated_data);
+                }
+
             }
             $return = array("success" => true, "error_code" => 0, "info" => "Operation Successfully Done");
         }

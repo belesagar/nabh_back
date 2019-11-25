@@ -15,4 +15,9 @@ class HospitalUsersIndicators extends Model
         return $this->belongsTo('App\Model\NabhIndicators', 'indicator_id', 'indicators_id');
     }
 
+    public function assign_indicators()
+    {
+        return $this->belongsTo('App\Model\AssignIndicators', 'indicators_id', 'indicator_id');
+    }
+
 }
