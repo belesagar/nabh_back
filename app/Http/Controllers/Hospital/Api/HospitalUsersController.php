@@ -282,56 +282,123 @@ class HospitalUsersController extends Controller
         return json_encode($return);
     }
 
-    public function UserAssignIndicators(Request $request, $id)
+    public function UserAssignIndicators(Request $request)
     {
-        $request_data = $request->all();
-        $selected_indicators = [];
-        $check_indicator_selection = true;
-        foreach ($request_data as $key => $value) {
-            if ($value != "") {
-                $check_indicator_selection = false;
-                $selected_indicators[] = $key;
-            }
-        }
+        $validator = \Validator::make($request->all(), [
+            'indicator_id' => 'required|numeric',
+            'is_add' => 'required'
+        ]);
 
-        if ($check_indicator_selection) {
-            $return = array("success" => false, "error_code" => 1, "info" => "Please Select the indicators.");
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
-            $insert_data_array = [];
-            foreach ($selected_indicators as $indicators_value) {
-                $check_indicators_availability = $this->hospital_users_indicators->where([
-                    [
-                        'hospital_id',
-                        $this->hospital_id
-                    ],
-                    ["indicator_id", $indicators_value],
-                    ['hospital_user_id', $id]
-                ])->get();
-                if (count($check_indicators_availability) == 0) {
-                    $insert_data_array[] = array(
+            $request_data = $request->all();
+            extract($request_data);
+
+            $check_indicator_availability = $this->hospital_users_indicators->where([
+                    ['hospital_id', $this->hospital_id],
+                    ['hospital_user_id', $this->hospital_user_id],
+                    ["indicator_id", $indicator_id]
+            ])->first();
+            
+            if(empty($check_indicator_availability))
+            {
+                if($is_add)
+                {
+                    $insert_data_array = array(
                         "hospital_id" => $this->hospital_id,
-                        "hospital_user_id" => $id,
-                        "indicator_id" => $indicators_value,
+                        "hospital_user_id" => $this->hospital_user_id,
+                        "indicator_id" => $indicator_id,
                     );
+                    $response_id = $this->hospital_users_indicators->insert($insert_data_array);  
                 }
-            }
-
-            if (count($insert_data_array) > 0) {
-                $response_id = $this->hospital_users_indicators->insert($insert_data_array);
-                if ($response_id > 0) {
-                    $return = array("success" => true, "error_code" => 0, "info" => "Indicators Applied Successfully.");
-                } else {
-                    $return = array(
-                        "success" => false,
-                        "error_code" => 1,
-                        "info" => "Something is wrong, Please try again."
-                    );
+            }else{
+                if($is_add)
+                {
+                    $updated_data = ['status' => 'ACTIVE'];
+                }else{
+                    $updated_data = ['status' => 'INACTIVE'];
                 }
-            } else {
-                $return = array("success" => true, "error_code" => 0, "info" => "Indicators Applied Successfully.");
-            }
+                $response = $this->hospital_users_indicators->where([
+                    ['hospital_id', $this->hospital_id],
+                    ["hospital_user_id", $this->hospital_user_id],
+                    ["indicator_id", $indicator_id]
+                ])->update($updated_data);
 
+            }
+            $return = array("success" => true, "error_code" => 0, "info" => "Operation Successfully Done");
         }
+
+
+        // $request_data = $request->all();
+        // $selected_indicators = [];
+        // $check_indicator_selection = true;
+        // foreach ($request_data as $key => $value) {
+        //     if ($value != "") {
+        //         $check_indicator_selection = false;
+        //         if($value)
+        //         {
+        //             $selected_indicators[] = $key;
+        //         }
+        //     }
+        // }
+
+        // if ($check_indicator_selection) {
+        //     $return = array("success" => false, "error_code" => 1, "info" => "Please Select the indicators.");
+        // } else {
+        //     $insert_data_array = [];
+        //     foreach ($request_data as $id => $indicators_value) {
+        //         if($indicators_value != "")
+        //         {
+
+        //             $check_indicators_availability = $this->hospital_users_indicators->where([
+        //                 [
+        //                     'hospital_id',
+        //                     $this->hospital_id
+        //                 ],
+        //                 ["indicator_id", $indicators_value],
+        //                 ['hospital_user_id', $this->hospital_user_id]
+        //             ])->get();
+        //             if (count($check_indicators_availability) == 0) {
+        //                 $insert_data_array = array(
+        //                     "hospital_id" => $this->hospital_id,
+        //                     "hospital_user_id" => $this->hospital_user_id,
+        //                     "indicator_id" => $indicators_value,
+        //                 );
+
+        //                 $response_id = $this->hospital_users_indicators->insert($insert_data_array);
+        //             }else{
+        //                 $update_data = ["status" => "ACTIVE"];
+        //                 $response = $this->hospital_users_indicators->where([
+        //                     ['hospital_user_id',$this->hospital_user_id],
+        //                     ["hospital_id",$this->hospital_id],
+        //                     ["indicator_id",$indicators_value],
+        //                 ])->update($update_data);
+        //             }
+        //         }
+        //     }
+
+        //     if (count($insert_data_array) > 0) {
+        //         $response_id = $this->hospital_users_indicators->insert($insert_data_array);
+        //         if ($response_id > 0) {
+        //             $return = array("success" => true, "error_code" => 0, "info" => "Indicators Applied Successfully.");
+        //         } else {
+        //             $return = array(
+        //                 "success" => false,
+        //                 "error_code" => 1,
+        //                 "info" => "Something is wrong, Please try again."
+        //             );
+        //         }
+        //     } else {
+        //         $return = array("success" => true, "error_code" => 0, "info" => "Indicators Applied Successfully.");
+        //     }
+
+        // }
         return json_encode($return);
     }
 

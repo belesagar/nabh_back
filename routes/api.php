@@ -120,7 +120,7 @@ Route::group(['middleware' => ['Cors']], function () {
             Route::get('users/profile-data', 'HospitalUsersController@getInfo');
             Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
             Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
-			Route::match(['get', 'post'],'user/permission/{id}', 'HospitalUsersController@UserAssignIndicators');
+			Route::post('user/indicator/assign', 'HospitalUsersController@UserAssignIndicators');
 
 			//Hospital Packages
 			Route::get('packages/getlist', 'HospitalPackagesController@List');
@@ -129,6 +129,7 @@ Route::group(['middleware' => ['Cors']], function () {
 			//Assign Indicators
 			Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators');
 			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
+			Route::get('user/indicators/list', 'NabhIndicatorsController@getHospitalUserIndicators');
 
 			//Doctors Route
 			Route::post('doctors/getlist', 'DoctorsController@List');
