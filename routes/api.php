@@ -158,6 +158,9 @@ Route::group(['middleware' => ['Cors']], function () {
             Route::post('virtual/add-floor-data', 'VirtualHospitalController@addVirtualfloorData');
             Route::post('virtual/get-floor-data', 'VirtualHospitalController@getfloorDataByFloorNumber');
             
+            //Reports
+            Route::post('indicator/report', 'HospitalReportsController@createChartDataOfIndicator');
+
         });
 	});
 

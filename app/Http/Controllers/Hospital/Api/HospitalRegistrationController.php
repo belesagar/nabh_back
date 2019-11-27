@@ -6,14 +6,18 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalRegistration;
 use App\Model\HospitalUsers;
+use App\Repositories\HospitalRegistrationRepository;
 use DB;
 
 class HospitalRegistrationController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        HospitalRegistrationRepository $hospital_registration_repository
+    )
     {
         $this->hospital_registration = new HospitalRegistration();
         $this->hospital_users = new HospitalUsers();
+        $this->hospital_registration_repository = $hospital_registration_repository;
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
@@ -109,8 +113,9 @@ class HospitalRegistrationController extends Controller
 
     public function getInfo(Request $request)
     {
-        $data = $this->hospital_registration->where("hospital_id", $this->hospital_id)->where("status", "ACTIVE")->first();
-       
+        $param = ["hospital_id" => $this->hospital_id, "status" => "ACTIVE"];
+        $data = $this->hospital_registration_repository->getDataByCustomeWhere($param);
+        
         if (!empty($data)) {
             $data = array("data_info" => $data);
             $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
