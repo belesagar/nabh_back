@@ -27,4 +27,9 @@ class HospitalUsers extends Authenticatable implements JWTSubject
         return [];
     }
 
+    public function hospital_data()
+    {
+        return $this->belongsTo('App\Model\HospitalRegistration', 'hospital_id', 'hospital_id');
+    }
+
 }
