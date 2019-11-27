@@ -41,4 +41,10 @@ class VirtualHospitalRepository
             return $this->model->where($field_name, $field_value)->first();
         }
     }
+
+    public function getDataByWithData($param)
+    {
+        return $this->model->virtual_hospital_data()->where($param)->first();
+    }
+
 }

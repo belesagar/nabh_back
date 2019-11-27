@@ -2,15 +2,16 @@
 
 namespace App\Repositories;
 
-use App\Model\IndicatorsData;
+use App\Model\HospitalRegistration;
 
-class HospitalIndicatorsRepository
+class HospitalRegistrationRepository
 {
     protected $model;
 
-    public function __construct(IndicatorsData $model_name)
+    public function __construct(HospitalRegistration $model_name)
     {
         $this->model = $model_name;
+        $this->select = ["hospital_name", "spoc_name", "spoc_designation", "email", "mobile", "city", "state", "pincode", "number_of_bed"];
     }
 
     public function create($params)
@@ -30,24 +31,24 @@ class HospitalIndicatorsRepository
 
     public function show($id)
     {
-        return $this->model->find($id);
+        return $this->model->select($this->select)->find($id);
     }
 
     public function findByField($field_name, $field_value, $multiple = false)
     {
         if ($multiple) {
-            return $this->model->where($field_name, $field_value)->get();
+            return $this->model->select($this->select)->where($field_name, $field_value)->get();
         } else {
-            return $this->model->where($field_name, $field_value)->first();
+            return $this->model->select($this->select)->where($field_name, $field_value)->first();
         }
     }
 
     public function getDataByCustomeWhere($param, $multiple = false)
     {
         if ($multiple) {
-            return $this->model->where($param)->get();
+            return $this->model->select($this->select)->where($param)->get();
         } else {
-            return $this->model->where($param)->first();
+            return $this->model->select($this->select)->where($param)->first();
         }
     }
 

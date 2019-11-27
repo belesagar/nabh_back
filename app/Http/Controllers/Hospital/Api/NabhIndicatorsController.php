@@ -18,6 +18,7 @@ use App\Model\HospitalOtInformation;
 use App\Services\Hospital\HospitalIndicatorsService;
 use App\Services\Admin\IndicatorsFormFieldsService;
 use App\Services\Admin\NabhIndicatorsService;
+use App\Services\CommonService;
 use App\Repositories\VirtualHospitalAssetDataRepository;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Excel\DataExportController;
@@ -30,7 +31,8 @@ class NabhIndicatorsController extends Controller
         VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository,
         HospitalIndicatorsService $hospital_indicators_service,
         IndicatorsFormFieldsService $indicators_form_fields_service,
-        NabhIndicatorsService $nabh_indicators_service
+        NabhIndicatorsService $nabh_indicators_service,
+        CommonService $common_service
     )
     {
         $this->indicators_data = new IndicatorsData();
@@ -49,6 +51,7 @@ class NabhIndicatorsController extends Controller
         $this->hospital_indicators_service = $hospital_indicators_service;
         $this->indicators_form_fields_service = $indicators_form_fields_service;
         $this->nabh_indicators_service = $nabh_indicators_service;
+        $this->common_service = $common_service;
 
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -562,8 +565,10 @@ class NabhIndicatorsController extends Controller
 
                 $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
 
-                Excel::store(new DataExportController($excel_data), \Config::get('constant.UPLOAD_DOCUMENT_URL')."public/hospital/excel/" . $file_name);
-                $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/excel/" . $file_name;
+                // Excel::store(new DataExportController($excel_data), \Config::get('constant.UPLOAD_DOCUMENT_URL')."public/hospital/excel/" . $file_name);
+                // $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/excel/" . $file_name;
+
+                $file_url = $this->common_service->createExcel($excel_data,$file_name);
 
                 $data['file_url'] = $file_url;
 
@@ -576,11 +581,13 @@ class NabhIndicatorsController extends Controller
                 $data = [          'title' => 'First PDF for Medium',          'heading' => 'Hello from 99Points.info',          'content' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'        
             ];
 
-            $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);  
+            // $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);  
 
-            Storage::put(\Config::get('constant.UPLOAD_DOCUMENT_URL').'hospital/pdf/'.$file_name, $pdf->output());
-                $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/pdf/" . $file_name;
+            // Storage::put(\Config::get('constant.UPLOAD_DOCUMENT_URL').'hospital/pdf/'.$file_name, $pdf->output());
+            //     $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/pdf/" . $file_name;
 
+            $file_url = $this->common_service->createPdf($data,$file_name);
+            
                 $data['file_url'] = $file_url;
             } else {
 
