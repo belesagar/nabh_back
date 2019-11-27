@@ -96,7 +96,7 @@ class AuthController extends Controller
 
                     $token_data['hospital_unique_id'] = $hospital_data[0]['hospital_unique_id'];
                     $token_data['hospital_name'] = $hospital_data[0]['hospital_name'];
-
+                    
                     $token = auth('hospital_api')->login($token_data);
                     $data = array("token" => $token);
                     $return = array(

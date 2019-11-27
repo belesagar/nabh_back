@@ -558,12 +558,12 @@ class NabhIndicatorsController extends Controller
             if (isset($request_data['type']) && $request_data['type'] == "excel") {
 
                 $heading_array = array_keys($indicator_data[0]->toArray());
-                $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array];
+                $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array,"other_data" => $this->payload];
 
                 $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
 
-                Excel::store(new DataExportController($excel_data), "hospital/excel/" . $file_name);
-                $file_url = "storage/hospital/excel/" . $file_name;
+                Excel::store(new DataExportController($excel_data), \Config::get('constant.UPLOAD_DOCUMENT_URL')."public/hospital/excel/" . $file_name);
+                $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/excel/" . $file_name;
 
                 $data['file_url'] = $file_url;
 
@@ -578,8 +578,8 @@ class NabhIndicatorsController extends Controller
 
             $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);  
 
-            Storage::put('hospital/pdf/'.$file_name, $pdf->output());
-                $file_url = "storage/hospital/pdf/" . $file_name;
+            Storage::put(\Config::get('constant.UPLOAD_DOCUMENT_URL').'hospital/pdf/'.$file_name, $pdf->output());
+                $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/pdf/" . $file_name;
 
                 $data['file_url'] = $file_url;
             } else {

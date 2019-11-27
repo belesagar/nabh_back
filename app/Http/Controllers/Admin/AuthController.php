@@ -7,6 +7,11 @@ use App\Http\Controllers\Controller;
 use App\Model\AdminUser;
 use App\Model\IndicatorsData;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\Excel\DataExportController;
+
+use Maatwebsite\Excel\Concerns\WithDrawings;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PDF;
 
 class AuthController extends Controller
@@ -210,17 +215,31 @@ class AuthController extends Controller
     {
         // return Excel::store($this->export_data, 'users.xlsx');
         // dd(public_path('hospital'));
-//         $data = $this->indicators_data->all();
-//         $heading_array = array_keys($data[0]->toArray());
+        $data = $this->indicators_data->all();
+        // dd($data);
+        $heading_array = array_keys($data[0]->toArray());
 
-//         $excel_data = ["excel_data"=>$data,"heading_array" => $heading_array];
-
-//         Excel::store(new DataExportController1($excel_data),"public/hospital/excel/users12.xlsx");
+        $excel_data = ["excel_data"=>$data,"heading_array" => $heading_array];
+        // dd($excel_data);
+        Excel::store(new DataExportController($excel_data),"users12345.xlsx");
+        // Excel::download(new DataExportController($excel_data),"users12.xlsx");
 
 // #
 //         // return Excel::store(new DataExportController($excel_data), 'users.xlsx');
 //         dd(Storage::url('hospital/excel/users12.xlsx'));
 //         dd(Storage::url('hospital/excel/users.xlsx'));
+    }
+
+    public function drawings()
+    {
+        $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();;
+        $drawing->setName('Logo');
+        $drawing->setDescription('This is my logo');
+        // $drawing->setPath(public_path('/img/logo.jpg'));
+        $drawing->setHeight(90);
+        $drawing->setCoordinates('B3');
+
+        return $drawing;
     }
 
      public function downloadPdf()
