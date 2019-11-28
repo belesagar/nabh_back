@@ -6,7 +6,7 @@ if($environment == "production")
     $document_url = "storage/app/public/";
     $upload_document_url = "public/";
 } else if($environment == "local"){
-    $document_url = "storage/";
+    $document_url = "storage/app/public/";
     $upload_document_url = "";
 }
 

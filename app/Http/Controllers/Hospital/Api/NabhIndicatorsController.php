@@ -101,7 +101,7 @@ class NabhIndicatorsController extends Controller
 
             //Indicators Details
             $indicators_details = $this->getIndicatorsDetail($request_data['indicator_id']);
-           
+
             $formdata = $this->getFormField($request_data);
 
             /* $indicators_input = [];
@@ -201,7 +201,7 @@ class NabhIndicatorsController extends Controller
             ['indicators_ids', 'like', '%"' . $postdata['indicator_id'] . '"%'],
             ['status', 'ACTIVE']
         ])->orderBy('priority', 'asc')->get()->toArray();
-       
+
         foreach ($indicator_data as $key => $value) {
             if ($value['handle_type'] == "" || $value['handle_type'] == "outside") {
                 $value['validation'] = [];
@@ -284,7 +284,7 @@ class NabhIndicatorsController extends Controller
                     $yesno_array = array("Used" => "Used", "Not Used" => "Not Used");
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
                 }
-                
+
                 if ($value['data_show_type'] == "product_select") {
                     $yesno_array = array("PCV" => "PCV", "FFP" => "FFP", "SDP" => "SDP", "RDP" => "RDP");
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
@@ -292,9 +292,9 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "root_cause") {
                     $yesno_array = array(
-                        "WRONG DRUG WRONG PATIENT" => "WRONG DRUG WRONG PATIENT", 
-                        "WRONG DOSE" => "WRONG DOSE", 
-                        "WRONG ROUTE" => "WRONG ROUTE", 
+                        "WRONG DRUG WRONG PATIENT" => "WRONG DRUG WRONG PATIENT",
+                        "WRONG DOSE" => "WRONG DOSE",
+                        "WRONG ROUTE" => "WRONG ROUTE",
                         "WRONG TIME" => "WRONG TIME",
                         "WRONG ROUTE OF ADMINISTRATION" => "WRONG ROUTE OF ADMINISTRATION",
                         "DRUG INTERACTION" => "DRUG INTERACTION",
@@ -307,9 +307,9 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "ward_name") {
                     $yesno_array = array(
-                        "SEMIPRIVATE ROOM" => "SEMIPRIVATE ROOM", 
-                        "GENERAL MALE WARD" => "GENERAL MALE WARD", 
-                        "GENERAL FEMALE WARD" => "GENERAL FEMALE WARD", 
+                        "SEMIPRIVATE ROOM" => "SEMIPRIVATE ROOM",
+                        "GENERAL MALE WARD" => "GENERAL MALE WARD",
+                        "GENERAL FEMALE WARD" => "GENERAL FEMALE WARD",
                         "SEMIPRIVATE ROOM" => "SEMIPRIVATE ROOM",
                         "DELUX ROOM" => "DELUX ROOM",
                         "SUPER DELUX ROOM" => "SUPER DELUX ROOM",
@@ -323,9 +323,9 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "final_outcome_of_adr") {
                     $yesno_array = array(
-                        "PATIENT DIED" => "PATIENT DIED", 
-                        "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS" => "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS", 
-                        "PATIENT SUFFERED PERMENANT HARM" => "PATIENT SUFFERED PERMENANT HARM", 
+                        "PATIENT DIED" => "PATIENT DIED",
+                        "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS" => "PATIENT NEEDED LIFE SUSTAINING INTERVENTIONS",
+                        "PATIENT SUFFERED PERMENANT HARM" => "PATIENT SUFFERED PERMENANT HARM",
                         "PATIENT SUFFERED FROM TEMPORARY HARM AND NEEDED INITIAL OR PROLONGED HOSPITALIZATION" => "PATIENT SUFFERED FROM TEMPORARY HARM AND NEEDED INITIAL OR PROLONGED HOSPITALIZATION",
                         "PATIENT SUFFERED FROM TEMPORARY HARM THAT NEEDED INTERVENTION" => "PATIENT SUFFERED FROM TEMPORARY HARM THAT NEEDED INTERVENTION",
                         "PATIENT NEEDED MONITORING OR TEMPORARY  INTERVENTION TO PRECLUDE HARM" => "PATIENT NEEDED MONITORING OR TEMPORARY  INTERVENTION TO PRECLUDE HARM",
@@ -341,7 +341,7 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "no_counter_select") {
                     $yesno_array = array(
-                        "1" => "1", 
+                        "1" => "1",
                         "2" => "2",
                         "3" => "3",
                         "4" => "4",
@@ -352,17 +352,17 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "work_time_period") {
                     $data_array = array(
-                        "LESS THAN ONE MONTH" => "LESS THAN ONE MONTH", 
+                        "LESS THAN ONE MONTH" => "LESS THAN ONE MONTH",
                         "LESS THAN 6 MONTHS" => "LESS THAN 6 MONTHS",
                         "MORE THAN 6 MONTHS" => "MORE THAN 6 MONTHS",
                     );
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($data_array);
                 }
-                
+
 
                 if ($value['data_show_type'] == "test_advice_select") {
                     $yesno_array = array(
-                        "HEMOGRAM" => "HEMOGRAM", 
+                        "HEMOGRAM" => "HEMOGRAM",
                         "SR BILIRUBIN" => "SR BILIRUBIN",
                         "SR ELECTROLYTES" => "SR ELECTROLYTES",
                         "SR CREATININE" => "SR CREATININE",
@@ -376,16 +376,16 @@ class NabhIndicatorsController extends Controller
 
                 if ($value['data_show_type'] == "cause_of_injury") {
                     $data_array = array(
-                        "SOMEONE PUSH YOU" => "SOMEONE PUSH YOU", 
-                        "WHILE OPENING THE SHARP" => "WHILE OPENING THE SHARP", 
-                        "WHILE RECAPPING THE SHARP" => "WHILE RECAPPING THE SHARP", 
-                        "WHILE GIVING THE SHARP TO ANOTHER PERSON" => "WHILE GIVING THE SHARP TO ANOTHER PERSON", 
-                        "WHILE CUTTING THE NEEDLE" => "WHILE CUTTING THE NEEDLE", 
+                        "SOMEONE PUSH YOU" => "SOMEONE PUSH YOU",
+                        "WHILE OPENING THE SHARP" => "WHILE OPENING THE SHARP",
+                        "WHILE RECAPPING THE SHARP" => "WHILE RECAPPING THE SHARP",
+                        "WHILE GIVING THE SHARP TO ANOTHER PERSON" => "WHILE GIVING THE SHARP TO ANOTHER PERSON",
+                        "WHILE CUTTING THE NEEDLE" => "WHILE CUTTING THE NEEDLE",
                         "OTHER" => "OTHER"
                     );
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($data_array);
                 }
-                
+
                 if ($value['data_show_type'] == "rate1to5") {
                     $rate1to5_array = array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5");
                     $value["data_value"] = $rate1to5_array;
@@ -495,7 +495,7 @@ class NabhIndicatorsController extends Controller
         //     $indicators_list = $this->assign_indicators->with(['indicators' => function($query){
         //         $query->where('status', "ACTIVE");
         //     }])->where("hospital_id",$this->hospital_id)->get();
-            
+
         // } else {
             //\DB::enableQueryLog();
             $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
@@ -522,7 +522,7 @@ class NabhIndicatorsController extends Controller
             $where['indicators_id'] = $indicator_id;
         }
         $indicators_details = $this->nabh_indicators->where($where)->get();
-        
+
         return $indicators_details;
     }
 
@@ -532,13 +532,13 @@ class NabhIndicatorsController extends Controller
         $hospital_id = $this->payload['hospital_id'];
         $indicator_id = $request_data['indicator_id'];
         $data = [];
-        
+
         $indicators_details = $this->nabh_indicators_service->getIndicatorsDetail($indicator_id);
-        
+
         $data['indicators_details'] = $indicators_details;
 
         $return = $this->indicators_form_fields_service->getIndicatorColumns($indicator_id);
-        
+
        if ($return['success']) {
         if (!empty($return['data']['column_data'])) {
         $indicators_columns = [];
@@ -578,16 +578,16 @@ class NabhIndicatorsController extends Controller
 
                 $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".pdf";
 
-                $data = [          'title' => 'First PDF for Medium',          'heading' => 'Hello from 99Points.info',          'content' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'        
+                $data = [          'title' => 'First PDF for Medium',          'heading' => 'Hello from 99Points.info',          'content' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'
             ];
 
-            // $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);  
+            // $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);
 
             // Storage::put(\Config::get('constant.UPLOAD_DOCUMENT_URL').'hospital/pdf/'.$file_name, $pdf->output());
             //     $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/pdf/" . $file_name;
 
             $file_url = $this->common_service->createPdf($data,$file_name);
-            
+
                 $data['file_url'] = $file_url;
             } else {
 
@@ -596,6 +596,10 @@ class NabhIndicatorsController extends Controller
             $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
         } else {
             $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+            if((isset($request_data['type']) && $request_data['type'] == "excel") || (isset($request_data['type']) && $request_data['type'] == "pdf"))
+            {
+                $return = array("success" => false, "error_code" => 1, "info" => "Data not present for this indicators.");
+            }
         }
         } else {
            $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
@@ -667,7 +671,7 @@ class NabhIndicatorsController extends Controller
                     ['hospital_id', $this->hospital_id],
                     ["indicators_id", $indicator_id]
             ])->first();
-            
+
             if(empty($check_indicator_availability))
             {
                 if($is_add)
@@ -676,7 +680,7 @@ class NabhIndicatorsController extends Controller
                         "hospital_id" => $this->hospital_id,
                         "indicators_id" => $indicator_id,
                     );
-                    $response_id = $this->assign_indicators->insert($insert_data_array);  
+                    $response_id = $this->assign_indicators->insert($insert_data_array);
                 }
             }else{
                 if($is_add)
@@ -702,7 +706,7 @@ class NabhIndicatorsController extends Controller
             }
             $return = array("success" => true, "error_code" => 0, "info" => "Operation Successfully Done");
         }
-        
+
         // $selected_indicators = [];
         // $check_indicator_selection = true;
         // foreach ($request_data as $key => $value) {
