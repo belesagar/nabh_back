@@ -19,16 +19,14 @@ class HospitalIndicatorsService
     public function getIndicatorsDetail($indicator_id = "")
     {
         $where = ["status" => "ACTIVE"];
-        if($indicator_id != "")
-        {
+        if ($indicator_id != "") {
             $where['indicators_id'] = $indicator_id;
         }
 
         $indicators_details = $this->hospital_indicator_repository->getDataByCustomeWhere($where);
-        
+
         return $indicators_details;
     }
-
 
 
 }

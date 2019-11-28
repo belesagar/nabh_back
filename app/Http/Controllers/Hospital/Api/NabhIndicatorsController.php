@@ -19,7 +19,11 @@ use App\Services\Hospital\HospitalIndicatorsService;
 use App\Services\Admin\IndicatorsFormFieldsService;
 use App\Services\Admin\NabhIndicatorsService;
 use App\Services\CommonService;
+use App\Services\Hospital\HospitalReportsService;
+
 use App\Repositories\VirtualHospitalAssetDataRepository;
+use App\Repositories\HospitalRegistrationRepository;
+
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Excel\DataExportController;
 use Illuminate\Support\Facades\Storage;
@@ -29,12 +33,14 @@ class NabhIndicatorsController extends Controller
 {
     public function __construct(
         VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository,
+        HospitalRegistrationRepository $hospital_registration_repository,
         HospitalIndicatorsService $hospital_indicators_service,
         IndicatorsFormFieldsService $indicators_form_fields_service,
         NabhIndicatorsService $nabh_indicators_service,
-        CommonService $common_service
-    )
-    {
+        CommonService $common_service,
+        HospitalReportsService $hospital_report_service
+
+    ) {
         $this->indicators_data = new IndicatorsData();
         $this->indicators_data_history = new IndicatorsDataHistory();
         $this->assign_indicators = new AssignIndicators();
@@ -48,10 +54,13 @@ class NabhIndicatorsController extends Controller
         $this->hospital_ot_information = new HospitalOtInformation();
 
         $this->virtual_hospital_asset_data_repository = $virtual_hospital_asset_data_repository;
+        $this->hospital_registration_repository = $hospital_registration_repository;
+
         $this->hospital_indicators_service = $hospital_indicators_service;
         $this->indicators_form_fields_service = $indicators_form_fields_service;
         $this->nabh_indicators_service = $nabh_indicators_service;
         $this->common_service = $common_service;
+        $this->hospital_report_service = $hospital_report_service;
 
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
@@ -63,15 +72,14 @@ class NabhIndicatorsController extends Controller
         // \DB::enableQueryLog();
         $request_data = $request->all();
         $where = ['status' => 'ACTIVE'];
-        if(isset($request_data['search_indicators']) && $request_data['search_indicators'] != "")
-        {
+        if (isset($request_data['search_indicators']) && $request_data['search_indicators'] != "") {
             // $where = ['indicators_id' => $request_data['search_indicators']];
-            $where[] = ['name','like','%'.$request_data['search_indicators'].'%'];
+            $where[] = ['name', 'like', '%' . $request_data['search_indicators'] . '%'];
         }
 
         $list = $this->nabh_indicators->where($where)
-        ->get()
-        ->toArray();
+            ->get()
+            ->toArray();
 //         $query = \DB::getQueryLog();
 
 // $query = end($query);
@@ -178,7 +186,7 @@ class NabhIndicatorsController extends Controller
                 "data" => [
                     "indicators_input" => $formdata['indicators_input'],
                     "form_name_array" => $formdata['form_name_array'],
-                    "indicators_details" => !empty($indicators_details)?$indicators_details[0]:[],
+                    "indicators_details" => !empty($indicators_details) ? $indicators_details[0] : [],
                 ]
             );
         }
@@ -193,7 +201,7 @@ class NabhIndicatorsController extends Controller
 
         $indicator_data = $this->indicators_forms_fields->select("form_id", "form_type as type",
             "form_name as input_name", "label", "placeholder", "id", "class", "data_show_type", "handle_type",
-            'priority','form_group','input_hide_id')->with([
+            'priority', 'form_group', 'input_hide_id')->with([
             'getValidations' => function ($query) {
                 $query->select('form_id', 'validations');
             }
@@ -234,7 +242,7 @@ class NabhIndicatorsController extends Controller
                     $value["data_value"] = \Helpers::convertKeyValuePair($doctor_list, 'doctor_id', 'name');
                 }
                 if ($value['data_show_type'] == "ot") {
-                    $asset_array = ["hospital_id" => $this->hospital_id,"type" => "OT"];
+                    $asset_array = ["hospital_id" => $this->hospital_id, "type" => "OT"];
                     $ot_data = $this->virtual_hospital_asset_data_repository->getFloorAssetData($asset_array);
 
                     // $ot_list = $this->hospital_ot_information->select('ot_id', 'ot_name')->where([
@@ -335,7 +343,16 @@ class NabhIndicatorsController extends Controller
                 }
 
                 if ($value['data_show_type'] == "blood_group") {
-                    $yesno_array = array("A POSITIVE" => "A POSITIVE", "B POSITIVE" => "B POSITIVE", "AB POSITIVE" => "AB POSITIVE", "O POSITIVE" => "O POSITIVE", "A NEGATIVE" => "A NEGATIVE", "B NEGATIVE" => "B NEGATIVE", "AB NEGATIVE" => "AB NEGATIVE", "O NEGATIVE" => "O NEGATIVE");
+                    $yesno_array = array(
+                        "A POSITIVE" => "A POSITIVE",
+                        "B POSITIVE" => "B POSITIVE",
+                        "AB POSITIVE" => "AB POSITIVE",
+                        "O POSITIVE" => "O POSITIVE",
+                        "A NEGATIVE" => "A NEGATIVE",
+                        "B NEGATIVE" => "B NEGATIVE",
+                        "AB NEGATIVE" => "AB NEGATIVE",
+                        "O NEGATIVE" => "O NEGATIVE"
+                    );
                     $value["data_value"] = \Helpers::convertKeyIDTextPair($yesno_array);
                 }
 
@@ -400,9 +417,8 @@ class NabhIndicatorsController extends Controller
                     $value["data_value"] = $source_array;
                 }
                 $value['is_form_group'] = 0;
-                if($value['form_group'] != "")
-                {
-                    $form_group = json_decode($value['form_group'],true);
+                if ($value['form_group'] != "") {
+                    $form_group = json_decode($value['form_group'], true);
                     $value['form_group'] = $form_group;
                     $value['is_form_group'] = 1;
                     foreach ($form_group as $form_group_value) {
@@ -448,8 +464,7 @@ class NabhIndicatorsController extends Controller
                 $insert_data[$form_data['input_name']] = $this->hospital_user_id;
             }
 
-            if($form_data['form_group'] != "")
-            {
+            if ($form_data['form_group'] != "") {
                 $insert_data[$form_data['input_name']] = json_encode($insert_data[$form_data['input_name']]);
             }
         }
@@ -497,15 +512,17 @@ class NabhIndicatorsController extends Controller
         //     }])->where("hospital_id",$this->hospital_id)->get();
 
         // } else {
-            //\DB::enableQueryLog();
-            $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
+        //\DB::enableQueryLog();
+        $indicators_list = $this->hospital_users_indicators->with([
+            'indicators' => function ($query) {
                 $query->where('status', "ACTIVE");
-            }])->where("hospital_id",
-                $this->hospital_id)->where("hospital_user_id", $this->hospital_user_id)->where("status", "ACTIVE")->get();
-            // $query = \DB::getQueryLog();
+            }
+        ])->where("hospital_id",
+            $this->hospital_id)->where("hospital_user_id", $this->hospital_user_id)->where("status", "ACTIVE")->get();
+        // $query = \DB::getQueryLog();
 
-            // print_r($query);
-            // exit;
+        // print_r($query);
+        // exit;
         // }
 
         $data = ["data_info" => $indicators_list];
@@ -517,8 +534,7 @@ class NabhIndicatorsController extends Controller
     public function getIndicatorsDetail($indicator_id = "")
     {
         $where = ["status" => "ACTIVE"];
-        if($indicator_id != "")
-        {
+        if ($indicator_id != "") {
             $where['indicators_id'] = $indicator_id;
         }
         $indicators_details = $this->nabh_indicators->where($where)->get();
@@ -533,95 +549,106 @@ class NabhIndicatorsController extends Controller
         $indicator_id = $request_data['indicator_id'];
         $data = [];
 
+        $hospital_data = $this->hospital_registration_repository->findByField("hospital_id", $hospital_id);
+
         $indicators_details = $this->nabh_indicators_service->getIndicatorsDetail($indicator_id);
 
         $data['indicators_details'] = $indicators_details;
 
         $return = $this->indicators_form_fields_service->getIndicatorColumns($indicator_id);
 
-       if ($return['success']) {
-        if (!empty($return['data']['column_data'])) {
-        $indicators_columns = [];
-        if (isset($request_data['type']) && $request_data['type'] == "excel") {
-            // $indicators_columns[] = "indicators_unique_id";
-            // $indicators_columns[] = "indicators_id";
-            $indicators_columns = array_merge($indicators_columns, $return['data']['column_data']);
-        } else {
-            $indicators_columns = ['*'];
-        }
+        if ($return['success']) {
+            if (!empty($return['data']['column_data'])) {
+                $indicators_columns = [];
+                if (isset($request_data['type']) && $request_data['type'] == "excel") {
+                    // $indicators_columns[] = "indicators_unique_id";
+                    // $indicators_columns[] = "indicators_id";
+                    $indicators_columns = array_merge($indicators_columns, $return['data']['column_data']);
+                } else {
+                    $indicators_columns = ['*'];
+                }
 
-        $indicator_data = $this->indicators_data->select($indicators_columns)
-        ->where('hospital_id',$hospital_id)
-        ->where('indicators_id', $indicator_id)
-        ->orderBy('created_at', 'desc')
-        ->get();
+                $indicator_data = $this->indicators_data->select($indicators_columns)
+                    ->where('hospital_id', $hospital_id)
+                    ->where('indicators_id', $indicator_id)
+                    ->orderBy('created_at', 'desc')
+                    ->get();
 
-        if (count($indicator_data) > 0) {
-            //This for download excel
-            if (isset($request_data['type']) && $request_data['type'] == "excel") {
+                if (count($indicator_data) > 0) {
+                    //This for download excel
+                    if (isset($request_data['type']) && $request_data['type'] == "excel") {
 
-                $heading_array = array_keys($indicator_data[0]->toArray());
-                $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array,"other_data" => $this->payload];
+                        $heading_array = array_keys($indicator_data[0]->toArray());
+                        $excel_data = [
+                            "excel_data" => $indicator_data,
+                            "heading_array" => $heading_array,
+                            "other_data" => $hospital_data
+                        ];
 
-                $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
+                        $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".xlsx";
 
-                // Excel::store(new DataExportController($excel_data), \Config::get('constant.UPLOAD_DOCUMENT_URL')."public/hospital/excel/" . $file_name);
-                // $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/excel/" . $file_name;
+                        // Excel::store(new DataExportController($excel_data), \Config::get('constant.UPLOAD_DOCUMENT_URL')."public/hospital/excel/" . $file_name);
+                        // $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/excel/" . $file_name;
 
-                $file_url = $this->common_service->createExcel($excel_data,$file_name);
+                        $file_url = $this->common_service->createExcel($excel_data, $file_name);
 
-                $data['file_url'] = $file_url;
+                        $data['file_url'] = $file_url;
 
-            } if(isset($request_data['type']) && $request_data['type'] == "pdf") {
-                $heading_array = array_keys($indicator_data[0]->toArray());
-                $excel_data = ["excel_data" => $indicator_data, "heading_array" => $heading_array];
+                    }
+                    if (isset($request_data['type']) && $request_data['type'] == "pdf") {
 
-                $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".pdf";
+                        if ($indicator_id == 1) {
+                            $pdf_data = $this->hospital_report_service->createSsiPercentage($indicator_data);
 
-                $data = [          'title' => 'First PDF for Medium',          'heading' => 'Hello from 99Points.info',          'content' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'
-            ];
+                            $file_name = $hospital_id . $request_data['indicator_id'] . $indicator_data[0]->indicators_unique_id . ".pdf";
 
-            // $pdf = PDF::loadView('pdf_template/hospital/pdf_view', $data);
+                            $file_url = $this->common_service->createPdf($pdf_data, $file_name);
 
-            // Storage::put(\Config::get('constant.UPLOAD_DOCUMENT_URL').'hospital/pdf/'.$file_name, $pdf->output());
-            //     $file_url = \Config::get('constant.DOCUMENT_URL')."hospital/pdf/" . $file_name;
+                            $data['file_url'] = $file_url;
+                        } else {
+                            $return = array(
+                                "success" => false,
+                                "error_code" => 1,
+                                "info" => "PDF data not prepared yet."
+                            );
+                            return response()->json($return);
+                        }
+                    } else {
 
-            $file_url = $this->common_service->createPdf($data,$file_name);
-
-                $data['file_url'] = $file_url;
+                        $data['list_data'] = $indicator_data;
+                    }
+                    $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+                } else {
+                    $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+                    if ((isset($request_data['type']) && $request_data['type'] == "excel") || (isset($request_data['type']) && $request_data['type'] == "pdf")) {
+                        $return = array(
+                            "success" => false,
+                            "error_code" => 1,
+                            "info" => "Data not present for this indicators."
+                        );
+                    }
+                }
             } else {
-
-                $data['list_data'] = $indicator_data;
+                $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
             }
-            $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
         } else {
-            $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
-            if((isset($request_data['type']) && $request_data['type'] == "excel") || (isset($request_data['type']) && $request_data['type'] == "pdf"))
-            {
-                $return = array("success" => false, "error_code" => 1, "info" => "Data not present for this indicators.");
-            }
+            $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
         }
-        } else {
-           $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
-       }
-       } else {
-           $return = array("success" => false, "error_code" => 1, "info" => "Indicators data not present.");
-       }
 
         return response()->json($return);
     }
 
     public function ListofAcceptIndicators(Request $request)
     {
-        $list = $this->assign_indicators->select("assign_indicators.indicators_id","ni.*")
-        ->where([
-            ['assign_indicators.status', 'ACTIVE'],
-            ['ni.status', 'ACTIVE'],
-            ['assign_indicators.hospital_id', $this->hospital_id]
-        ])
-        ->join('nabh_indicators as ni', 'ni.indicators_id', '=', 'assign_indicators.indicators_id')
-        ->get()
-        ->toArray();
+        $list = $this->assign_indicators->select("assign_indicators.indicators_id", "ni.*")
+            ->where([
+                ['assign_indicators.status', 'ACTIVE'],
+                ['ni.status', 'ACTIVE'],
+                ['assign_indicators.hospital_id', $this->hospital_id]
+            ])
+            ->join('nabh_indicators as ni', 'ni.indicators_id', '=', 'assign_indicators.indicators_id')
+            ->get()
+            ->toArray();
         $data = array("list" => $list);
 
 
@@ -631,11 +658,13 @@ class NabhIndicatorsController extends Controller
 
     public function getHospitalUserIndicators(Request $request)
     {
-        $indicators_list = $this->hospital_users_indicators->with(['indicators' => function($query){
+        $indicators_list = $this->hospital_users_indicators->with([
+            'indicators' => function ($query) {
                 $query->where('status', "ACTIVE");
-            }])
+            }
+        ])
             ->where([
-                ["hospital_users_indicators.hospital_id",$this->hospital_id],
+                ["hospital_users_indicators.hospital_id", $this->hospital_id],
                 ["hospital_users_indicators.hospital_user_id", $this->hospital_user_id],
                 ["hospital_users_indicators.status", "ACTIVE"],
                 ["ai.status", "ACTIVE"],
@@ -668,25 +697,22 @@ class NabhIndicatorsController extends Controller
             extract($request_data);
 
             $check_indicator_availability = $this->assign_indicators->where([
-                    ['hospital_id', $this->hospital_id],
-                    ["indicators_id", $indicator_id]
+                ['hospital_id', $this->hospital_id],
+                ["indicators_id", $indicator_id]
             ])->first();
 
-            if(empty($check_indicator_availability))
-            {
-                if($is_add)
-                {
+            if (empty($check_indicator_availability)) {
+                if ($is_add) {
                     $insert_data_array = array(
                         "hospital_id" => $this->hospital_id,
                         "indicators_id" => $indicator_id,
                     );
                     $response_id = $this->assign_indicators->insert($insert_data_array);
                 }
-            }else{
-                if($is_add)
-                {
+            } else {
+                if ($is_add) {
                     $updated_data = ['status' => 'ACTIVE'];
-                }else{
+                } else {
                     $updated_data = ['status' => 'INACTIVE'];
                 }
                 $response = $this->assign_indicators->where([
@@ -694,7 +720,7 @@ class NabhIndicatorsController extends Controller
                     ["indicators_id", $indicator_id]
                 ])->update($updated_data);
 
-                if(!$is_add) //if inactive
+                if (!$is_add) //if inactive
                 {
                     $response = $this->hospital_users_indicators->where([
                         ['hospital_id', $this->hospital_id],
