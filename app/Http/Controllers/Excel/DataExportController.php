@@ -16,7 +16,7 @@ class DataExportController extends Controller implements FromView
 {
     public function __construct($excel_data)
     {
-        $this->heading_array = $excel_data['heading_array'];
+        $this->heading_array = isset($excel_data['heading_array'])?$excel_data['heading_array']:[];
         $this->excel_data = $excel_data['excel_data'];
         $this->total_data = $excel_data;
     }

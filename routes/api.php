@@ -160,6 +160,8 @@ Route::group(['middleware' => ['Cors']], function () {
             
             //Reports
             Route::post('indicator/report', 'HospitalReportsController@createChartDataOfIndicator');
+            Route::post('indicator/excel-report-list', 'HospitalReportsController@getIndicatorExcelList');
+            Route::post('indicator/excel-report-data', 'HospitalReportsController@getIndicatorExcelReportData');
 
         });
 	});
