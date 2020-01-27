@@ -269,4 +269,28 @@ class Helpers
         return $binString;
     }
 
+    public static function getFirstandlastDate($from_date = "", $to_date = "")
+    {
+        $from_data_bk = $from_date;
+        $date_array = [];
+
+        while (strtotime($from_date) <= strtotime($to_date)) {
+                 
+            if($from_data_bk == $from_date)
+            {
+                $lastDateOfMonth = date("Y-m-t", strtotime($from_date));
+               
+                $date_array[] = ["first_date" => $from_date, "last_date" => $lastDateOfMonth];
+            }
+            
+            $from_date = date ("Y-m-d", strtotime("+1 month", strtotime($from_date)));
+            $first_date = date('Y-m-01', strtotime($from_date));
+            $lastDateOfMonth = date("Y-m-t", strtotime($from_date));
+            $date_array[] = ["first_date" => $first_date, "last_date" => $lastDateOfMonth];
+                
+        }
+
+        return $date_array;
+    }
+
 }

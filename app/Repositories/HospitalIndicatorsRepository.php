@@ -51,4 +51,22 @@ class HospitalIndicatorsRepository
         }
     }
 
+    public function getDataByCustomeWhereWithSelect($param, $select_data = ['*'], $multiple = false)
+    {
+        if ($multiple) {
+
+//             \DB::enableQueryLog();
+
+// $this->model->select($select_data)->where($param)->get();
+
+// $query = \DB::getQueryLog();
+
+// print_r($query);
+// exit;
+            return $this->model->select($select_data)->where($param)->get();
+        } else {
+            return $this->model->select($select_data)->where($param)->first();
+        }
+    }
+
 }

@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Model\IndicatorsFormsFields;
+use App\Model\IndicatorExcelFormat;
 
-class IndicatorsFormFieldsRepository
+class IndicatorExcelFormatRepository
 {
     protected $model;
 
-    public function __construct(IndicatorsFormsFields $model_name)
+    public function __construct(IndicatorExcelFormat $model_name)
     {
         $this->model = $model_name;
     }
@@ -42,20 +42,13 @@ class IndicatorsFormFieldsRepository
         }
     }
 
-    public function getDataByCustomeWhere($param)
+    public function getDataByCustomeWhere($param, $multiple = true)
     {
-        return $this->model->select("form_name as input_name", "label")->where($param)->get();
-    }
-
-    public function getIndicatorDataByForExcel($param)
-    {
-        $where_clause = ["status" => "ACTIVE"];
-        return $this->model->where($where_clause)->whereIn('form_id', $param['indicator_field_ids'])->get();
-    }
-
-    public function getData($param)
-    {
-        return $this->model->where($param)->get();
+        if ($multiple) {
+            return $this->model->where($param)->get();
+        } else {
+            return $this->model->where($param)->first();
+        }
     }
 
 }

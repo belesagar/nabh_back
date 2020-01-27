@@ -11,10 +11,10 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($excel_data as $user)
+    @foreach($excel_data as $excel_value)
         <tr>
             @foreach($heading_array as $heading_value)
-                <td>{{ $user->$heading_value }}</td>
+                <td>{{ $excel_value[$heading_value] }}</td>
             @endforeach
         </tr>
     @endforeach

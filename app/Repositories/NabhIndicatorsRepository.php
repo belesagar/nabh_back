@@ -51,4 +51,11 @@ class NabhIndicatorsRepository
         }
     }
 
+    public function getIndicatorDataByForExcel($param)
+    {
+        $where_clause = ["status" => "ACTIVE"];
+        return $this->model->where($where_clause)->where($param)->get();
+        // return $this->model->where($where_clause)->whereIn('indicators_id', $param['indicator_ids'])->get();
+    }
+
 }
