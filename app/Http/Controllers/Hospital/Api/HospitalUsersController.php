@@ -73,6 +73,7 @@ class HospitalUsersController extends Controller
         $data['data_count'] = $data_count;
 
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+
         return json_encode($return);
     }
 
@@ -123,6 +124,7 @@ class HospitalUsersController extends Controller
             'city' => 'required',
             'state' => 'required',
             'address' => 'required',
+            'role_id' => 'required',
             'status' => 'required',
         ]);
 
@@ -150,6 +152,7 @@ class HospitalUsersController extends Controller
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
                     "address" => $request_data['address'],
+                    "role_id" => $request_data['role_id'],
                     "status" => $request_data['status']
                 );
 
@@ -188,6 +191,7 @@ class HospitalUsersController extends Controller
             'designation' => 'required',
             'state' => 'required',
             'address' => 'required',
+            'role_id' => 'required',
             'status' => 'required',
         ]);
 
@@ -238,6 +242,7 @@ class HospitalUsersController extends Controller
                     "city" => $request_data['city'],
                     "state" => $request_data['state'],
                     "address" => $request_data['address'],
+                    "role_id" => $request_data['role_id'],
                     "status" => $request_data['status']
                 );
 
@@ -248,15 +253,15 @@ class HospitalUsersController extends Controller
                 $response = $this->hospital_users->where('hospital_user_id',
                     $request_data['user_id'])->where("hospital_id",
                     $this->payload['hospital_id'])->update($update_data);
-                if ($response) {
+                // if ($response) {
                     $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
-                } else {
-                    $return = array(
-                        "success" => false,
-                        "error_code" => 1,
-                        "info" => "Something is wrong, please try again."
-                    );
-                }
+                // } else {
+                //     $return = array(
+                //         "success" => false,
+                //         "error_code" => 1,
+                //         "info" => "Something is wrong, please try again."
+                //     );
+                // }
 
             } else {
                 $return = array(

@@ -111,12 +111,39 @@ Route::group(['middleware' => ['Cors']], function () {
 			//Indicator List
 			Route::post('indicatorlist', 'NabhIndicatorsController@indicatorsList');
 
-			//Hospital Users
-			Route::post('users/getlist', 'HospitalUsersController@List');
-			Route::post('users/adddata', 'HospitalUsersController@Add');
-			Route::post('users/editdata', 'HospitalUsersController@Edit');
-            Route::post('profile/change-password', 'HospitalUsersController@changePassword');
-            Route::post('users/getinfo', 'HospitalUsersController@getUserInfo');
+			Route::group(['middleware' => ['hospitalUserPermission']], function () {
+				//Hospital Users
+				Route::post('users/getlist', 'HospitalUsersController@List')->name("view_key-hospital_user_list");
+				Route::post('users/adddata', 'HospitalUsersController@Add')->name("add_key-hospital_user_add");
+				Route::post('users/editdata', 'HospitalUsersController@Edit')->name("edit_key-hospital_user_edit");
+	            Route::post('profile/change-password', 'HospitalUsersController@changePassword');
+	            Route::post('users/getinfo', 'HospitalUsersController@getUserInfo')->name("view_key-hospital_user_list");
+
+	            //Doctors Route
+				Route::post('doctors/getlist', 'DoctorsController@List')->name("view_key-hospital_doctor_list");
+				Route::post('doctor/adddata', 'DoctorsController@Add')->name("add_key-hospital_doctor_add");
+				Route::post('doctor/editdata', 'DoctorsController@Edit')->name("edit_key-hospital_doctor_edit");
+				Route::post('doctor/getinfo', 'DoctorsController@getInfo')->name("view_key-hospital_doctor_list");
+				Route::get('doctors/type/getlist', 'DoctorsController@typeList')->name("view_key-hospital_doctor_list");
+
+				//Menu Route
+	            Route::get('role/list', 'HospitalPermissionController@hospitalRoleList')->name("view_key-hospital_role_list");
+	            Route::post('role/add', 'HospitalRoleController@Add')->name("add_key-hospital_role_add");
+	            Route::post('role/edit', 'HospitalRoleController@Edit')->name("edit_key-hospital_role_edit");
+
+	            //Review Meeting
+	            Route::post('review-meeting/list', 'HospitalReviewMeetingController@List')->name("view_key-hospital_review_meeting_list");
+	            Route::post('review-meeting/add', 'HospitalReviewMeetingController@Add')->name("add_key-hospital_review_meeting_add");
+	            Route::post('review-meeting/edit', 'HospitalReviewMeetingController@Edit')->name("edit_key-hospital_review_meeting_edit");
+	            Route::post('review-meeting/getinfo', 'HospitalReviewMeetingController@getInfo')->name("view_key-hospital_review_meeting_list");
+
+	            //Patient
+	            Route::post('patient/list', 'HospitalPatientController@List')->name("view_key-hospital_patient_list");
+	            Route::post('patient/adddata', 'HospitalPatientController@Add')->name("add_key-hospital_patient_add");
+	            Route::post('patient/editdata', 'HospitalPatientController@Edit')->name("edit_key-hospital_patient_edit");
+	            Route::post('patient/getinfo', 'HospitalPatientController@getInfo')->name("view_key-hospital_patient_list");
+
+            });
             Route::get('users/profile-data', 'HospitalUsersController@getInfo');
             Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
             Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');
@@ -131,12 +158,6 @@ Route::group(['middleware' => ['Cors']], function () {
 			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
 			Route::get('user/indicators/list', 'NabhIndicatorsController@getHospitalUserIndicators');
 
-			//Doctors Route
-			Route::post('doctors/getlist', 'DoctorsController@List');
-			Route::post('doctor/adddata', 'DoctorsController@Add');
-			Route::post('doctor/editdata', 'DoctorsController@Edit');
-			Route::post('doctor/getinfo', 'DoctorsController@getInfo');
-			Route::get('doctors/type/getlist', 'DoctorsController@typeList');
 
 			//OT Route
 			Route::get('ot/getlist', 'OtController@List');
@@ -144,12 +165,6 @@ Route::group(['middleware' => ['Cors']], function () {
 			//Payments
 			Route::post('payment/initiate', 'HospitalTransactionController@initiatePayment');
 			Route::post('payment/check', 'HospitalTransactionController@checkPayment');
-
-            //Patient
-            Route::post('patient/list', 'HospitalPatientController@List');
-            Route::post('patient/adddata', 'HospitalPatientController@Add');
-            Route::post('patient/editdata', 'HospitalPatientController@Edit');
-            Route::post('patient/getinfo', 'HospitalPatientController@getInfo');
 
             //Virtual Hospital
             Route::post('virtual/hospital', 'VirtualHospitalController@addVirtualHospitalData');
@@ -161,7 +176,14 @@ Route::group(['middleware' => ['Cors']], function () {
             //Reports
             Route::post('indicator/report', 'HospitalReportsController@createChartDataOfIndicator');
             Route::post('indicator/excel-report-list', 'HospitalReportsController@getIndicatorExcelList');
-            Route::post('indicator/excel-report-data', 'HospitalReportsController@getIndicatorExcelReportData');
+            Route::post('indicator/excel-report-data', 'HospitalReportsController@getIndicatorExcelReportData')->name("report_data");
+
+            //Menu Route
+            Route::get('menu/list', 'HospitalPermissionController@hospitalMenuList');
+            Route::post('check/permission', 'HospitalPermissionController@hospitalCheckPermission');
+            Route::post('role/permission/menu/list', 'HospitalRoleController@roleMenuPermissionList');
+            Route::post('role/permission/menu/add', 'HospitalRoleController@roleMenuPermissionAdd');
+            Route::get('user/role/list', 'HospitalPermissionController@hospitalUserRoleList');
 
         });
 	});

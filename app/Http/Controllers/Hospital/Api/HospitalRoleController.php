@@ -6,13 +6,27 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalPatient;
 use App\Model\VirtualHospital;
+use App\Repositories\HospitalRoleRepository;
+use App\Repositories\HospitalMenuRepository;
+use App\Repositories\HospitalRolePermissionRepository;
+use App\Services\Hospital\HospitalPermissionService;
 
-class HospitalPatientController extends Controller
+class HospitalRoleController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        HospitalRoleRepository $hospital_role_repository,
+        HospitalMenuRepository $hospital_menu_repository,
+        HospitalRolePermissionRepository $hospital_role_permission_repository,
+        HospitalPermissionService $hospital_permission_service
+    )
     {
         $this->hospital_patient = new HospitalPatient(); 
         $this->virtual_hospital = new VirtualHospital();
+        $this->hospital_role_repository = $hospital_role_repository;
+        $this->hospital_menu_repository = $hospital_menu_repository;
+        $this->hospital_role_permission_repository = $hospital_role_permission_repository;
+        $this->hospital_permission_service = $hospital_permission_service;
+
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
@@ -30,10 +44,7 @@ class HospitalPatientController extends Controller
 
         $request_data = $request->all();
 
-        if(isset($request_data['status']))
-        {
-            $where['status'] = $request_data['status'];
-        }
+        $where[] = ['status',$request_data['status']];
 
         //Filter option
         if(isset($request_data['search_string']) && $request_data['search_string'] != "")
@@ -43,19 +54,19 @@ class HospitalPatientController extends Controller
 
             if($search_key == "patient_name")
             {
-                $where["patient_name"] = 'like %'.$search_string.'%';
+                $where[] = ['patient_name','like','%'.$search_string.'%'];
             }
             if($search_key == "email")
             {
-                $where['email'] = $search_string;
+                $where[] = ['email',$search_string];
             }
             if($search_key == "mobile")
             {
-                $where['mobile'] = $search_string;
+                $where[] = ['mobile',$search_string];
             }
             if($search_key == "pid")
             {
-                $where['pid'] = $search_string;
+                $where[] = ['pid',$search_string];
             }
         }
 
@@ -120,15 +131,8 @@ class HospitalPatientController extends Controller
     public function Add(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'patient_name' => 'required',
-            'email' => 'required|email',
-            'mobile' => 'required|numeric',
-            'pid' => 'required',
-            'sex' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'address' => 'required',
-//            'status' => 'required',
+            'role_name' => 'required',
+            'status' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -140,34 +144,34 @@ class HospitalPatientController extends Controller
             $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $request_data = $request->all();
-            if (!empty($this->payload)) {
-                $unique_id = date("his");
+           
+            $insert_data = array(
+                "hospital_id" => $this->hospital_id,
+                "role_name" => $request_data['role_name'],
+                "status" => $request_data['status']
+            );
 
-                $insert_data = array(
-                    "hospital_id" => $this->payload['hospital_id'],
-                    "patient_reference_number" => $unique_id,
-                    "patient_name" => $request_data['patient_name'],
-                    "email" => $request_data['email'],
-                    "mobile" => $request_data['mobile'],
-                    "pid" => $request_data['pid'],
-                    "sex" => $request_data['sex'],
-                    "address" => $request_data['address'],
-                    "city" => $request_data['city'],
-                    "state" => $request_data['state'],
-//                    "status" => $request_data['status']
-                );
-
-                $response = $this->hospital_patient->create($insert_data);
-                if ($response) {
-                    $return = array("success" => true, "error_code" => 0, "info" => "Data added Successfully");
-                } else {
-                    $return = array(
-                        "success" => false,
-                        "error_code" => 1,
-                        "info" => "Something is wrong, please try again."
-                    );
+            $response = $this->hospital_role_repository->create($insert_data);
+           
+            if (!empty($response)) {
+                //This code for create menu permission 
+                $menu_list = $this->hospital_menu_repository->all();
+                $insert_data = [];
+                foreach ($menu_list as $menu_value) {
+                    $insert_data[] = [
+                        "role_id" => $response->role_id,
+                        "menu_id" => $menu_value->menu_id,
+                        "hospital_id" => $this->hospital_id,
+                        "hospital_user_id" => $this->hospital_user_id,
+                    ];
                 }
 
+                if(!empty($insert_data))
+                {
+                    $this->hospital_role_permission_repository->insert($insert_data);
+                }
+
+                $return = array("success" => true, "error_code" => 0, "info" => "Data added Successfully");
             } else {
                 $return = array(
                     "success" => false,
@@ -176,6 +180,8 @@ class HospitalPatientController extends Controller
                 );
             }
 
+           
+
         }
         return json_encode($return);
     }
@@ -183,16 +189,8 @@ class HospitalPatientController extends Controller
     public function Edit(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'patient_id' => 'required',
-            'patient_name' => 'required',
-            'email' => 'required|email',
-            'mobile' => 'required|numeric',
-            'pid' => 'required',
-            'sex' => 'required',
-            'city' => 'required',
-            'state' => 'required',
-            'address' => 'required',
-//            'status' => 'required',
+            'role_name' => 'required',
+            'status' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -207,20 +205,16 @@ class HospitalPatientController extends Controller
 
 
             $update_data = array(
-                "patient_name" => $request_data['patient_name'],
-                "email" => $request_data['email'],
-                "mobile" => $request_data['mobile'],
-                "pid" => $request_data['pid'],
-                "sex" => $request_data['sex'],
-                "address" => $request_data['address'],
-                "city" => $request_data['city'],
-                "state" => $request_data['state'],
-//                "status" => $request_data['status']
+                "role_name" => $request_data['role_name'],
+                "status" => $request_data['status']
             );
 
-            $response = $this->hospital_patient->where('patient_reference_number',
-                $request_data['patient_id'])->where("hospital_id",
-                $this->payload['hospital_id'])->update($update_data);
+            $where_clouse = [
+                "hospital_id" => $this->hospital_id,
+                "role_id" => $request_data['role_id'],
+            ];
+
+            $response = $this->hospital_role_repository->update($update_data,$where_clouse);
             if ($response) {
                 $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
             } else {
@@ -236,17 +230,10 @@ class HospitalPatientController extends Controller
         return json_encode($return);
     }
 
-    public function addVirtualHospitalData(Request $request)
+    public function roleMenuPermissionList(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'total_number_of_beds' => 'required',
-            'no_of_patient_opd_in_per_day' => 'required',
-            'no_of_old_follow_patient_per_day' => 'required',
-            'no_of_new_follow_patient_per_day' => 'required',
-            'no_of_ipd_admission_per_day' => 'required',
-            'occupany_rate_in_hospital' => 'required',
-            'total_no_staff' => 'required',
-            'no_of_ward_in_ipd' => 'required',
+            'role_id' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -258,30 +245,30 @@ class HospitalPatientController extends Controller
             $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $request_data = $request->all();
-            if (!empty($this->payload)) {
-                $unique_id = date("his");
+            $return = $this->hospital_permission_service->hospitalUserMenuPermissionList($request_data);
+        }
+        return json_encode($return);
+    }
+    
+    public function roleMenuPermissionAdd(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'role_id' => 'required|numeric',
+            'permission_id' => 'required|numeric',
+            'is_add' => 'required',
+            'type' => 'required'
+        ]);
 
-                $insert_data = $request_data;
-
-                $response = $this->virtual_hospital->create($insert_data);
-                if ($response) {
-                    $return = array("success" => true, "error_code" => 0, "info" => "Data added Successfully");
-                } else {
-                    $return = array(
-                        "success" => false,
-                        "error_code" => 1,
-                        "info" => "Something is wrong, please try again."
-                    );
-                }
-
-            } else {
-                $return = array(
-                    "success" => false,
-                    "error_code" => 1,
-                    "info" => "Something is wrong, please try again."
-                );
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
             }
-
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        } else {
+            $request_data = $request->all();
+            $return = $this->hospital_permission_service->hospitalRoleMenuPermissionAdd($request_data);
         }
         return json_encode($return);
     }

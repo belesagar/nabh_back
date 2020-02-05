@@ -2,21 +2,25 @@
 
 namespace App\Repositories;
 
-use App\Model\HospitalRegistration;
+use App\Model\HospitalRolePermission;
 
-class HospitalRegistrationRepository
+class HospitalRolePermissionRepository
 {
     protected $model;
 
-    public function __construct(HospitalRegistration $model_name)
+    public function __construct(HospitalRolePermission $model_name)
     {
         $this->model = $model_name;
-        $this->select = ["hospital_name", "spoc_name", "spoc_designation", "email", "mobile", "city", "state", "pincode", "number_of_bed"];
     }
 
     public function create($params)
     {
         return $this->model->create($params);
+    }
+
+    public function insert($params)
+    {
+        return $this->model->insert($params);
     }
 
     public function update($params, $where_clause)
@@ -49,6 +53,15 @@ class HospitalRegistrationRepository
             return $this->model->where($param)->get();
         } else {
             return $this->model->where($param)->first();
+        }
+    }
+
+    public function getDataByCustomeWhereWith($param, $multiple = false)
+    {
+        if ($multiple) {
+            return $this->model->with('menu_data')->where($param)->get();
+        } else {
+            return $this->model->with('menu_data')->where($param)->first();
         }
     }
 
