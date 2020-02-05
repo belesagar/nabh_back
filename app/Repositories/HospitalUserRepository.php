@@ -2,16 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Model\HospitalRegistration;
+use App\Model\HospitalUsers;
 
-class HospitalRegistrationRepository
+class HospitalUserRepository
 {
     protected $model;
 
-    public function __construct(HospitalRegistration $model_name)
+    public function __construct(HospitalUsers $model_name)
     {
         $this->model = $model_name;
-        $this->select = ["hospital_name", "spoc_name", "spoc_designation", "email", "mobile", "city", "state", "pincode", "number_of_bed"];
     }
 
     public function create($params)

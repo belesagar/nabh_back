@@ -2,16 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Model\HospitalRegistration;
+use App\Model\HospitalReviewMeeting;
 
-class HospitalRegistrationRepository
+class HospitalReviewMeetingRepository
 {
     protected $model;
 
-    public function __construct(HospitalRegistration $model_name)
+    public function __construct(HospitalReviewMeeting $model_name)
     {
         $this->model = $model_name;
-        $this->select = ["hospital_name", "spoc_name", "spoc_designation", "email", "mobile", "city", "state", "pincode", "number_of_bed"];
     }
 
     public function create($params)
@@ -34,6 +33,11 @@ class HospitalRegistrationRepository
         return $this->model->find($id);
     }
 
+    public function all()
+    {
+        return $this->model->all();
+    }
+
     public function findByField($field_name, $field_value, $multiple = false)
     {
         if ($multiple) {
@@ -43,7 +47,7 @@ class HospitalRegistrationRepository
         }
     }
 
-    public function getDataByCustomeWhere($param, $multiple = false)
+    public function getDataByCustomeWhere($param = [], $multiple = false)
     {
         if ($multiple) {
             return $this->model->where($param)->get();
