@@ -10,6 +10,7 @@ use App\Repositories\HospitalRoleRepository;
 use App\Repositories\HospitalMenuRepository;
 use App\Repositories\HospitalRolePermissionRepository;
 use App\Services\Hospital\HospitalPermissionService;
+use App\Services\Hospital\HospitalRoleService;
 
 class HospitalRoleController extends Controller
 {
@@ -17,7 +18,8 @@ class HospitalRoleController extends Controller
         HospitalRoleRepository $hospital_role_repository,
         HospitalMenuRepository $hospital_menu_repository,
         HospitalRolePermissionRepository $hospital_role_permission_repository,
-        HospitalPermissionService $hospital_permission_service
+        HospitalPermissionService $hospital_permission_service,
+        HospitalRoleService $hospital_role_service
     )
     {
         $this->hospital_patient = new HospitalPatient(); 
@@ -26,13 +28,14 @@ class HospitalRoleController extends Controller
         $this->hospital_menu_repository = $hospital_menu_repository;
         $this->hospital_role_permission_repository = $hospital_role_permission_repository;
         $this->hospital_permission_service = $hospital_permission_service;
+        $this->hospital_role_service = $hospital_role_service;
 
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
 
-        // $this->hospital_id = 1;
-        // $this->hospital_user_id = 1;
+        $this->hospital_id = 1;
+        $this->hospital_user_id = 1;
     }
 
 
@@ -131,7 +134,7 @@ class HospitalRoleController extends Controller
     public function Add(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'role_name' => 'required',
+            'role_name' => 'required|unique:hospital_role,role_name',
             'status' => 'required',
         ]);
 
@@ -151,7 +154,9 @@ class HospitalRoleController extends Controller
                 "status" => $request_data['status']
             );
 
-            $response = $this->hospital_role_repository->create($insert_data);
+            $return = $this->hospital_role_service->addRole($insert_data);
+
+            /*$response = $this->hospital_role_repository->create($insert_data);
            
             if (!empty($response)) {
                 //This code for create menu permission 
@@ -162,7 +167,7 @@ class HospitalRoleController extends Controller
                         "role_id" => $response->role_id,
                         "menu_id" => $menu_value->menu_id,
                         "hospital_id" => $this->hospital_id,
-                        "hospital_user_id" => $this->hospital_user_id,
+                        // "hospital_user_id" => $this->hospital_user_id,
                     ];
                 }
 
@@ -178,9 +183,7 @@ class HospitalRoleController extends Controller
                     "error_code" => 1,
                     "info" => "Something is wrong, please try again."
                 );
-            }
-
-           
+            }*/
 
         }
         return json_encode($return);

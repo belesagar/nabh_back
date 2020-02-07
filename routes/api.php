@@ -98,6 +98,7 @@ Route::group(['middleware' => ['Cors']], function () {
 
 			//Hospital Info
 			Route::get('info', 'HospitalRegistrationController@getInfo');
+			Route::get('login/info', 'HospitalUsersController@getUserLoginInfo');
 
 			//For adding and updating indicators data
 			Route::post('get_indicators_input', 'NabhIndicatorsController@getIndicatorsInput');
@@ -143,6 +144,14 @@ Route::group(['middleware' => ['Cors']], function () {
 	            Route::post('patient/editdata', 'HospitalPatientController@Edit')->name("edit_key-hospital_patient_edit");
 	            Route::post('patient/getinfo', 'HospitalPatientController@getInfo')->name("view_key-hospital_patient_list");
 
+	            //Assign Indicators
+				Route::get('user/indicators/list', 'NabhIndicatorsController@getHospitalUserIndicators')->name("view_key-hospital_user_indicators_list");
+				Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators')->name("view_key-hospital_package_accept_indicator_list");
+				Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators')->name("view_key-hospital_package_accept_indicator_list");
+
+				//Virtual Hospital
+				Route::get('virtual/data', 'VirtualHospitalController@getVirtualHospitalData')->name("view_key-hospital_virtual_data");
+
             });
             Route::get('users/profile-data', 'HospitalUsersController@getInfo');
             Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
@@ -152,11 +161,6 @@ Route::group(['middleware' => ['Cors']], function () {
 			//Hospital Packages
 			Route::get('packages/getlist', 'HospitalPackagesController@List');
 			Route::post('package/details', 'HospitalPackagesController@packageDetails');
-
-			//Assign Indicators
-			Route::post('packages/acceptindicators', 'NabhIndicatorsController@AcceptIndicators');
-			Route::get('packages/getacceptindicators/list', 'NabhIndicatorsController@ListofAcceptIndicators');
-			Route::get('user/indicators/list', 'NabhIndicatorsController@getHospitalUserIndicators');
 
 
 			//OT Route
@@ -168,7 +172,6 @@ Route::group(['middleware' => ['Cors']], function () {
 
             //Virtual Hospital
             Route::post('virtual/hospital', 'VirtualHospitalController@addVirtualHospitalData');
-            Route::get('virtual/data', 'VirtualHospitalController@getVirtualHospitalData');
             Route::get('virtual/floor-data', 'VirtualHospitalController@getVirtualHospitalFloorData');
             Route::post('virtual/add-floor-data', 'VirtualHospitalController@addVirtualfloorData');
             Route::post('virtual/get-floor-data', 'VirtualHospitalController@getfloorDataByFloorNumber');

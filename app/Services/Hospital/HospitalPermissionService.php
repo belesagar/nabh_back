@@ -24,8 +24,8 @@ class HospitalPermissionService
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
 
-        // $this->hospital_id = 1;
-        // $this->hospital_user_id = 1;
+        $this->hospital_id = 1;
+        $this->hospital_user_id = 1;
     }
 
     public function menuList()
@@ -42,6 +42,7 @@ class HospitalPermissionService
         ];
 
         $user_data = $this->hospital_user_repository->getDataByCustomeWhere($where_clouse);
+       
         if(!empty($user_data))
         {
             $where_clouse['role_id'] = $user_data['role_id'];
@@ -112,7 +113,7 @@ class HospitalPermissionService
         {
             $where_clouse = [$key_array[0] => $key_array[1]]; 
             $menu_data = $this->hospital_menu_repository->getDataByCustomeWhere($where_clouse);
-             dd($menu_data);
+             
             if(!empty($menu_data))
             {
                 $where_clouse = [
