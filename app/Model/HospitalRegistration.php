@@ -10,5 +10,4 @@ class HospitalRegistration extends Model
     protected $primaryKey = 'hospital_id';
     protected $guarded = [];
 
-
 }

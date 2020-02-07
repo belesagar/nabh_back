@@ -6,16 +6,23 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalUsers;
 use App\Model\HospitalUsersIndicators;
+use App\Repositories\HospitalUserRepository;
 
 class HospitalUsersController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        HospitalUserRepository $hospital_users_repository
+    )
     {
         $this->hospital_users = new HospitalUsers();
         $this->hospital_users_indicators = new HospitalUsersIndicators();
+        $this->hospital_users_repository = $hospital_users_repository;
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
+
+        $this->hospital_id = 1;
+        $this->hospital_user_id = 1;
     }
 
     public function List(Request $request)
@@ -519,6 +526,22 @@ class HospitalUsersController extends Controller
             }
 
         }
+        return json_encode($return);
+    }
+
+    public function getUserLoginInfo(Request $request)
+    {
+        $param = ["hospital_id" => $this->hospital_id, "hospital_user_id" => $this->hospital_user_id, "status" => "ACTIVE"];
+        $data = $this->hospital_users_repository->getDataByCustomeWhereWith($param);
+        
+        if (!empty($data)) {
+            $data = array("data_info" => $data);
+            $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+        } else {
+            $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
+        }
+
+
         return json_encode($return);
     }
 

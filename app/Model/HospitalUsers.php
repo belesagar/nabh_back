@@ -32,4 +32,9 @@ class HospitalUsers extends Authenticatable implements JWTSubject
         return $this->belongsTo('App\Model\HospitalRegistration', 'hospital_id', 'hospital_id');
     }
 
+    public function role_data()
+    {
+        return $this->belongsTo('App\Model\HospitalRole', 'role_id', 'role_id');
+    }
+
 }

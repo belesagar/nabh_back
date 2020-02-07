@@ -51,4 +51,13 @@ class HospitalUserRepository
         }
     }
 
+    public function getDataByCustomeWhereWith($param, $multiple = false)
+    {
+        if ($multiple) {
+            return $this->model->with('role_data')->where($param)->get();
+        } else {
+            return $this->model->with('role_data')->where($param)->first();
+        }
+    }
+    
 }
