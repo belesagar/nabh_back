@@ -6,13 +6,17 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalDoctors;
 use App\Model\HospitalDoctorsType;
+use App\Services\Hospital\HospitalDoctorService;
 
 class DoctorsController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        HospitalDoctorService $hospital_doctor_service
+    )
     {
         $this->hospital_doctors = new HospitalDoctors();
         $this->hospital_doctors_type = new HospitalDoctorsType();
+        $this->hospital_doctor_service = $hospital_doctor_service;
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
 
@@ -237,6 +241,26 @@ class DoctorsController extends Controller
             'desc')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
+        return json_encode($return);
+    }
+
+    public function uploadList(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'file_data' => 'required|mimes:csv,xls',
+        ]);
+
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        } else {
+            $return = $this->hospital_doctor_service->uploadList($request->all());
+            
+        }
         return json_encode($return);
     }
 

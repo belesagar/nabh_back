@@ -40,4 +40,10 @@ class CommonService
         return $file_url;
     }
 
+    public function readExcel($excel_path = "")
+    {
+        $data = Excel::load($excel_path)->get();
+        return $data;
+    }
+
 }
