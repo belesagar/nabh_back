@@ -16,6 +16,8 @@ class HospitalUserService
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
+        // $this->hospital_id = 1;
+        // $this->hospital_user_id = 1;
     }
 
     public function validateData($request_data = [])
@@ -130,4 +132,20 @@ class HospitalUserService
         return $return;
     }
     
+    public function getUserData()
+    {
+        $where_clouse = [
+            "hospital_id" => $this->hospital_id,
+            "hospital_user_id" => $this->hospital_user_id,
+        ];
+        $response = $this->hospital_user_repository->getDataByCustomeWhere($where_clouse);
+        if(!empty($response))
+        {
+            $return = array("success" => true, "error_code" => 0, "info" => "","data" => ["user_data" => $response]);
+        } else {
+            $return = array("success" => false, "error_code" => 1, "info" => "No data found");
+        }
+        return $return;
+    }
+
 }
