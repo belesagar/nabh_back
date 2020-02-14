@@ -6,17 +6,20 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Model\HospitalPatient;
 use App\Model\VirtualHospital;
+use App\Services\Hospital\HospitalPatientService;
 
 class HospitalPatientController extends Controller
 {
-    public function __construct(Request $request)
+    public function __construct(
+        HospitalPatientService $hospital_patient_service
+    )
     {
         $this->hospital_patient = new HospitalPatient(); 
         $this->virtual_hospital = new VirtualHospital();
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
-
+        $this->hospital_patient_service = $hospital_patient_service;
         // $this->hospital_id = 1;
         // $this->hospital_user_id = 1;
     }
@@ -119,7 +122,13 @@ class HospitalPatientController extends Controller
 
     public function Add(Request $request)
     {
-        $validator = \Validator::make($request->all(), [
+        $request_data = $request->all();
+        $return = $this->hospital_patient_service->createPatient($request_data);
+        if($return['success'])
+        {
+            $return = $this->hospital_patient_service->addPatient($request_data);
+        }
+        /*$validator = \Validator::make($request->all(), [
             'patient_name' => 'required',
             'email' => 'required|email',
             'mobile' => 'required|numeric',
@@ -176,7 +185,7 @@ class HospitalPatientController extends Controller
                 );
             }
 
-        }
+        }*/
         return json_encode($return);
     }
 
@@ -282,6 +291,26 @@ class HospitalPatientController extends Controller
                 );
             }
 
+        }
+        return json_encode($return);
+    }
+
+    public function uploadPatientList(Request $request)
+    {
+        $validator = \Validator::make($request->file(), [
+            'file_data' => 'required|mimes:csv,xls',
+        ]);
+
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message,"data" => $request->file('file_data'));
+        } else {
+            $return = $this->hospital_patient_service->uploadPatientList($request->all());
+            
         }
         return json_encode($return);
     }

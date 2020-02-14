@@ -153,6 +153,10 @@ Route::group(['middleware' => ['Cors']], function () {
 				Route::get('virtual/data', 'VirtualHospitalController@getVirtualHospitalData')->name("view_key-hospital_virtual_data");
 
             });
+
+	        Route::post('patient/list/upload', 'HospitalPatientController@uploadPatientList')->name("upload_key-hospital_patient_upload_list");
+
+
             Route::get('users/profile-data', 'HospitalUsersController@getInfo');
             Route::post('profile/savedata', 'HospitalUsersController@saveProfileData');
             Route::get('users/indicators/list/{id}', 'HospitalUsersController@GetUserAssignIndicators');

@@ -293,4 +293,8 @@ class Helpers
         return $date_array;
     }
 
+    public static function jd($data) {
+        echo json_encode($data);die;
+    }
+
 }

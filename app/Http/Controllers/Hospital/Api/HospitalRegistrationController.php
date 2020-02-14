@@ -96,6 +96,9 @@ class HospitalRegistrationController extends Controller
                         //Commit data
                         DB::commit();
 
+                        //Creating folder for hospital
+                        \Storage::makeDirectory('hospital/'.$insert_data['hospital_unique_id']);
+
                         $return = array(
                             "success" => true,
                             "error_code" => 0,
