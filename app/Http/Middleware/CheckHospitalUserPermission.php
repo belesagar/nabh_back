@@ -24,6 +24,7 @@ class CheckHospitalUserPermission
     public function handle($request, Closure $next)
     {
         $menu_key_name = $request->route()->getName();
+        
         $return = $this->hospital_permission_service->hospitalCheckMenuPermission($menu_key_name);
         if(!$return['success'])
         {

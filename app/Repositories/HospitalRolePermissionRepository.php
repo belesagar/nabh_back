@@ -59,9 +59,17 @@ class HospitalRolePermissionRepository
     public function getDataByCustomeWhereWith($param, $multiple = false)
     {
         if ($multiple) {
-            return $this->model->with('menu_data')->where($param)->get();
+            return $this->model->with(['menu_data' => function ($query) {
+                 $query->where('status', '=', 'ACTIVE');
+                 $query->orderBy('menu_priority', 'ASC');
+
+            }])->where($param)->get();
         } else {
-            return $this->model->with('menu_data')->where($param)->first();
+            return $this->model->with(['menu_data' => function ($query) {
+                 $query->where('status', '=', 'ACTIVE');
+                 $query->orderBy('menu_priority', 'ASC');
+
+            }])->where($param)->first();
         }
     }
 

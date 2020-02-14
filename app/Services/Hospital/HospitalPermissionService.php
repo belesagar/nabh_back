@@ -6,6 +6,8 @@ use App\Repositories\HospitalMenuRepository;
 use App\Repositories\HospitalRoleRepository;
 use App\Repositories\HospitalRolePermissionRepository;
 use App\Repositories\HospitalUserRepository;
+use App\Services\Hospital\HospitalUserService;
+use App\Services\Hospital\HospitalRoleService;
 
 class HospitalPermissionService
 {
@@ -13,19 +15,23 @@ class HospitalPermissionService
         HospitalMenuRepository $hospital_menu_repository,
         HospitalRoleRepository $hospital_role_repository,
         HospitalRolePermissionRepository $hospital_role_permission_repository,
-        HospitalUserRepository $hospital_user_repository
+        HospitalUserRepository $hospital_user_repository,
+        HospitalUserService $hospital_user_service,
+        HospitalRoleService $hospital_role_service
     ) {
         $this->hospital_menu_repository = $hospital_menu_repository;
         $this->hospital_role_repository = $hospital_role_repository;
         $this->hospital_role_permission_repository = $hospital_role_permission_repository;
         $this->hospital_user_repository = $hospital_user_repository;
+        $this->hospital_user_service = $hospital_user_service;
+        $this->hospital_role_service = $hospital_role_service;
 
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
 
-        $this->hospital_id = 1;
-        $this->hospital_user_id = 1;
+        // $this->hospital_id = 1;
+        // $this->hospital_user_id = 1;
     }
 
     public function menuList()
@@ -72,6 +78,7 @@ class HospitalPermissionService
 
         if(!empty($user_data))
         {
+            
             $where_clouse = [
                 "hospital_id" => $this->hospital_id,
                 "hospital_user_id" => $this->hospital_user_id,
@@ -90,6 +97,7 @@ class HospitalPermissionService
             } else {
                 $return = array("success" => false, "error_code" => 403, "info" => "You don't have permission to access this page.");
             }
+            
         } else {
             $return = array("success" => false, "error_code" => 403, "info" => "You don't have permission to access this page.");
         }
@@ -100,46 +108,54 @@ class HospitalPermissionService
     {
         $return = array("success" => true, "error_code" => 0, "info" => "");
 
-        $menu_type_array = [
-            "view_key" => "view",
-            "add_key" => "add",
-            "edit_key" => "edit",
-            "export_key" => "export",
-        ];
-
-        $key_array = explode("-", $menu_key_name);
-
-        if(count($key_array) > 0)
+        $return = $this->hospital_role_service->getUserRoleData();
+        if($return['success'])
         {
-            $where_clouse = [$key_array[0] => $key_array[1]]; 
-            $menu_data = $this->hospital_menu_repository->getDataByCustomeWhere($where_clouse);
-             
-            if(!empty($menu_data))
+            $role_data = $return['data']['role_data'];
+            if($role_data['role_name'] != "SUPER_ADMIN")
             {
-                $where_clouse = [
-                    "hospital_id" => $this->hospital_id,
-                    "hospital_user_id" => $this->hospital_user_id,
+                $menu_type_array = [
+                    "view_key" => "view",
+                    "add_key" => "add",
+                    "edit_key" => "edit",
+                    "export_key" => "export",
                 ];
-                $user_data = $this->hospital_user_repository->getDataByCustomeWhere($where_clouse);
 
-                if(!empty($user_data))
+                $key_array = explode("-", $menu_key_name);
+
+                if(count($key_array) > 0)
                 {
-                    $where_clouse = [
-                        "hospital_id" => $this->hospital_id,
-                        "hospital_user_id" => $this->hospital_user_id,
-                        "menu_id" => $menu_data->menu_id,
-                        "role_id" => $user_data['role_id'],
-                    ];
-
-                    $permission_data = $this->hospital_role_permission_repository->getDataByCustomeWhere($where_clouse)->toArray();
-                    
-                    if(!$permission_data[$menu_type_array[$key_array[0]]])
+                    $where_clouse = [$key_array[0] => $key_array[1]]; 
+                    $menu_data = $this->hospital_menu_repository->getDataByCustomeWhere($where_clouse);
+                     
+                    if(!empty($menu_data))
                     {
+                        $where_clouse = [
+                            "hospital_id" => $this->hospital_id,
+                            "hospital_user_id" => $this->hospital_user_id,
+                        ];
+                        $user_data = $this->hospital_user_repository->getDataByCustomeWhere($where_clouse);
+
+                        if(!empty($user_data))
+                        {
+                            $where_clouse = [
+                                "hospital_id" => $this->hospital_id,
+                                "hospital_user_id" => $this->hospital_user_id,
+                                "menu_id" => $menu_data->menu_id,
+                                "role_id" => $user_data['role_id'],
+                            ];
+
+                            $permission_data = $this->hospital_role_permission_repository->getDataByCustomeWhere($where_clouse)->toArray();
+                            
+                            if(!$permission_data[$menu_type_array[$key_array[0]]])
+                            {
+                                $return = array("success" => false, "error_code" => 403, "info" => "You don't have permission to access this page.");
+                            }
+                        }
+                    } else {
                         $return = array("success" => false, "error_code" => 403, "info" => "You don't have permission to access this page.");
                     }
                 }
-            } else {
-                $return = array("success" => false, "error_code" => 403, "info" => "You don't have permission to access this page.");
             }
         }
         return $return;
