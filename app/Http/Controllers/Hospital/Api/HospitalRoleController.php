@@ -34,8 +34,8 @@ class HospitalRoleController extends Controller
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
 
-        $this->hospital_id = 1;
-        $this->hospital_user_id = 1;
+        // $this->hospital_id = 1;
+        // $this->hospital_user_id = 1;
     }
 
 
