@@ -2,21 +2,32 @@
 
 namespace App\Services\Hospital;
 
+use App\Services\Hospital\ServiceController;
 use App\Repositories\VirtualHospitalRepository;
 use App\Repositories\VirtualHospitalDataRepository;
 use App\Repositories\VirtualHospitalAssetDataRepository;
+use App\Model\VirtualHospitalData;
 
 class VirtualHospitalService
 {
     public function __construct(
         VirtualHospitalRepository $virtual_hospital_repository,
         VirtualHospitalDataRepository $virtual_hospital_data_repository,
-        VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository
+        VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository,
+        VirtualHospitalData $virtual_hospital_data
     ) {
+       
         $this->virtual_hospital_repository = $virtual_hospital_repository;
         $this->virtual_hospital_data_repository = $virtual_hospital_data_repository;
         $this->virtual_hospital_asset_data_repository = $virtual_hospital_asset_data_repository;
+        $this->virtual_hospital_data = $virtual_hospital_data;
 
+        $this->payload = auth('hospital_api')->user();
+        $this->hospital_id = $this->payload['hospital_id'];
+        $this->hospital_user_id = $this->payload['hospital_user_id'];
+      
+        // $this->hospital_id = 1;
+        // $this->hospital_user_id = 1;
     }
 
     public function getVirtualHospitalDetails($hospital_id)
@@ -74,6 +85,19 @@ class VirtualHospitalService
         }
 
         $return = array("success" => true, "error_code" => 0, "info" => "", "data" => $data);
+
+        return $return;
+    }
+
+    public function getFloorDataWithAssetData()
+    {
+        $data = $this->virtual_hospital_data->where([
+            ["hospital_id" , $this->hospital_id]
+        ])->with(["virtual_hospital_asset_data" => function($q){
+            $q->where("hospital_id" , $this->hospital_id);
+        }])->get();
+
+        $return = array("success" => true, "error_code" => 0, "info" => "", "data" => ["floor_data" => $data]);
 
         return $return;
     }

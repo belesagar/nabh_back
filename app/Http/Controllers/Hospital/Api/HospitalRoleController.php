@@ -105,7 +105,7 @@ class HospitalRoleController extends Controller
     public function getInfo(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'patient_id' => 'required|numeric'
+            'role_id' => 'required|numeric'
         ]);
 
         if ($validator->fails()) {
@@ -117,15 +117,7 @@ class HospitalRoleController extends Controller
             $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $request_data = $request->all();
-            $data_info = $this->hospital_patient->where('patient_reference_number',
-                $request_data['patient_id'])->where("hospital_id", $this->payload['hospital_id'])
-                ->first();
-            if (!empty($data_info)) {
-                $data = array("data_info" => $data_info->toArray());
-                $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
-            } else {
-                $return = array("success" => false, "error_code" => 1, "info" => "Invalid Record");
-            }
+            $return = $this->hospital_role_service->getRoleData($request_data);
 
         }
         return json_encode($return);
@@ -133,8 +125,9 @@ class HospitalRoleController extends Controller
 
     public function Add(Request $request)
     {
+        $return = [];
         $validator = \Validator::make($request->all(), [
-            'role_name' => 'required|unique:hospital_role,role_name',
+            'role_name' => 'required',
             'status' => 'required',
         ]);
 
@@ -147,14 +140,29 @@ class HospitalRoleController extends Controller
             $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $request_data = $request->all();
-           
-            $insert_data = array(
-                "hospital_id" => $this->hospital_id,
-                "role_name" => $request_data['role_name'],
-                "status" => $request_data['status']
-            );
+            
+            $check_role_where_clouse = [
+                ["role_name" , $request_data['role_name']],
+                ["hospital_id" , $this->hospital_id]
+            ];
+            $check_role_availability = $this->hospital_role_repository->getDataByCustomeWhere($check_role_where_clouse);
+            
+            if(empty($check_role_availability))
+            {
+                $insert_data = array(
+                    "hospital_id" => $this->hospital_id,
+                    "role_name" => $request_data['role_name'],
+                    "status" => $request_data['status']
+                );
 
-            $return = $this->hospital_role_service->addRole($insert_data);
+                $return = $this->hospital_role_service->addRole($insert_data);
+            } else { 
+                $return = array(
+                    "success" => false,
+                    "error_code" => 1,
+                    "info" => "Role name is already taken."
+                );
+            }
 
             /*$response = $this->hospital_role_repository->create($insert_data);
            
@@ -194,6 +202,7 @@ class HospitalRoleController extends Controller
         $validator = \Validator::make($request->all(), [
             'role_name' => 'required',
             'status' => 'required',
+            'role_id' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -205,29 +214,43 @@ class HospitalRoleController extends Controller
             $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $request_data = $request->all();
-
-
-            $update_data = array(
-                "role_name" => $request_data['role_name'],
-                "status" => $request_data['status']
-            );
-
-            $where_clouse = [
-                "hospital_id" => $this->hospital_id,
-                "role_id" => $request_data['role_id'],
+            $check_role_where_clouse = [
+                ["role_name" , $request_data['role_name']],
+                ["hospital_id" , $this->hospital_id],
+                ["role_id" , "!=" ,$request_data['role_id']],
             ];
+            $check_role_availability = $this->hospital_role_repository->getDataByCustomeWhere($check_role_where_clouse);
 
-            $response = $this->hospital_role_repository->update($update_data,$where_clouse);
-            if ($response) {
-                $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
-            } else {
+            if(empty($check_role_availability))
+            {
+                $update_data = array(
+                    "role_name" => $request_data['role_name'],
+                    "status" => $request_data['status']
+                );
+
+                $where_clouse = [
+                    "hospital_id" => $this->hospital_id,
+                    "role_id" => $request_data['role_id'],
+                ];
+
+                $response = $this->hospital_role_repository->update($update_data,$where_clouse);
+
+                if (!$response) {
+                    $return = array("success" => true, "error_code" => 0, "info" => "Data updated Successfully");
+                } else {
+                    $return = array(
+                        "success" => false,
+                        "error_code" => 1,
+                        "info" => "Something is wrong, please try again."
+                    );
+                }
+            } else { 
                 $return = array(
                     "success" => false,
                     "error_code" => 1,
-                    "info" => "Something is wrong, please try again."
+                    "info" => "Role name is already taken."
                 );
             }
-
 
         }
         return json_encode($return);

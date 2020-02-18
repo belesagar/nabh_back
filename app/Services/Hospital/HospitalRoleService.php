@@ -108,4 +108,21 @@ class HospitalRoleService
         return $return;
     }
 
+    public function getRoleData($postdata)
+    {
+        $where_clouse = [
+            "hospital_id" => $this->hospital_id,
+            "role_id" => $postdata['role_id'],
+        ];
+        $response = $this->hospital_role_repository->getDataByCustomeWhere($where_clouse);
+        
+        if(!empty($response))
+        {
+            $return = array("success" => true, "error_code" => 0, "info" => "","data" => ["role_data" => $response->toArray()]);
+        } else {
+            $return = array("success" => false, "error_code" => 1, "info" => "No data found");
+        }
+        return $return;
+    }
+
 }

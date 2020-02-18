@@ -131,6 +131,7 @@ Route::group(['middleware' => ['Cors']], function () {
 	            Route::get('role/list', 'HospitalPermissionController@hospitalRoleList')->name("view_key-hospital_role_list");
 	            Route::post('role/add', 'HospitalRoleController@Add')->name("add_key-hospital_role_add");
 	            Route::post('role/edit', 'HospitalRoleController@Edit')->name("edit_key-hospital_role_edit");
+	            Route::post('role/getinfo', 'HospitalRoleController@getInfo')->name("view_key-hospital_role_list");
 
 	            //Review Meeting
 	            Route::post('review-meeting/list', 'HospitalReviewMeetingController@List')->name("view_key-hospital_review_meeting_list");
@@ -179,6 +180,7 @@ Route::group(['middleware' => ['Cors']], function () {
             Route::get('virtual/floor-data', 'VirtualHospitalController@getVirtualHospitalFloorData');
             Route::post('virtual/add-floor-data', 'VirtualHospitalController@addVirtualfloorData');
             Route::post('virtual/get-floor-data', 'VirtualHospitalController@getfloorDataByFloorNumber');
+            Route::get('virtual/get-floor-details', 'VirtualHospitalController@getFloorDataWithAssetData');
             
             //Reports
             Route::post('indicator/report', 'HospitalReportsController@createChartDataOfIndicator');
