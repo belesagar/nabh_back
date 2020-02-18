@@ -27,13 +27,13 @@ class HospitalUsersController extends Controller
 
     public function List(Request $request)
     {
-        $where = [["hospital_id", $this->hospital_id]];
+        $where = [["hospital_users.hospital_id", $this->hospital_id]];
 
         $data_count = $this->hospital_users->where($where)->count();
 
         $request_data = $request->all();
 
-        $where[] = ['status',$request_data['status']];
+        $where[] = ['hospital_users.status',$request_data['status']];
 
         //Filter option
         if(isset($request_data['search_string']) && $request_data['search_string'] != "")
@@ -43,15 +43,15 @@ class HospitalUsersController extends Controller
 
             if($search_key == "name")
             {
-                $where[] = ['name','like','%'.$search_string.'%'];
+                $where[] = ['hospital_users.name','like','%'.$search_string.'%'];
             }
             if($search_key == "email")
             {
-                $where[] = ['email',$search_string];
+                $where[] = ['hospital_users.email',$search_string];
             }
             if($search_key == "mobile")
             {
-                $where[] = ['mobile',$search_string];
+                $where[] = ['hospital_users.mobile',$search_string];
             }
         }
 
@@ -70,7 +70,8 @@ class HospitalUsersController extends Controller
         }
 
         $list = $this->hospital_users->where($where)
-        ->orderBy('created_at','desc')
+        ->leftJoin('hospital_role', 'hospital_role.role_id', '=', 'hospital_users.role_id')
+        ->orderBy('hospital_users.created_at','desc')
         ->offset($offset)
         ->limit($limit)
         ->get()

@@ -19,6 +19,7 @@ class VirtualHospitalController extends Controller
         VirtualHospitalAssetDataRepository $virtual_hospital_asset_data_repository
     )
     {
+
         $this->virtual_hospital = new VirtualHospital();
         $this->virtual_hospital_asset_data = new VirtualHospitalAssetData();
         $this->virtual_hospital_data = new VirtualHospitalData();
@@ -28,6 +29,7 @@ class VirtualHospitalController extends Controller
         $this->virtual_hospital_service = $virtual_hospital_service;
         $this->virtual_hospital_repository = $virtual_hospital_repository;
         $this->virtual_hospital_asset_data_repository = $virtual_hospital_asset_data_repository;
+
     }
 
     public function addVirtualHospitalData(Request $request)
@@ -273,6 +275,12 @@ class VirtualHospitalController extends Controller
             
         }
         $response['data']['asset_list'] = $asset_list;
+        return json_encode($response);
+    }
+
+    public function getFloorDataWithAssetData(Request $request)
+    {
+        $response = $this->virtual_hospital_service->getFloorDataWithAssetData();
         return json_encode($response);
     }
 
