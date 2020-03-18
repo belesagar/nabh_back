@@ -18,6 +18,11 @@ class HospitalUserRepository
         return $this->model->create($params);
     }
 
+    public function insert($params)
+    {
+        return $this->model->insert($params);
+    }
+    
     public function update($params, $where_clause)
     {
         return $this->model->where($where_clause)->update($params);

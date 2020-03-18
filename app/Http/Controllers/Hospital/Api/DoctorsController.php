@@ -26,11 +26,11 @@ class DoctorsController extends Controller
     {   
         $where = [["hospital_id", $this->hospital_id]];
 
-        $data_count = $this->hospital_doctors->where($where)->count();
-
         $request_data = $request->all();
 
         $where[] = ['status',$request_data['status']];
+
+        $data_count = $this->hospital_doctors->where($where)->count();
 
         //Filter option
         if(isset($request_data['search_string']) && $request_data['search_string'] != "")
@@ -241,13 +241,13 @@ class DoctorsController extends Controller
             'desc')->get()->toArray();
         $data = array("list" => $list);
         $return = array("success" => true, "error_code" => 0, "info" => "Success", "data" => $data);
-        return json_encode($return);
+        return $this->response($return);
     }
 
     public function uploadList(Request $request)
     {
         $validator = \Validator::make($request->all(), [
-            'file_data' => 'required|mimes:csv,xls',
+            'excel_data' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -261,7 +261,7 @@ class DoctorsController extends Controller
             $return = $this->hospital_doctor_service->uploadList($request->all());
             
         }
-        return json_encode($return);
+        return $this->response($return);
     }
 
 }

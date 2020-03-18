@@ -7,16 +7,19 @@ use App\Http\Controllers\Controller;
 use App\Model\HospitalUsers;
 use App\Model\HospitalUsersIndicators;
 use App\Repositories\HospitalUserRepository;
+use App\Services\Hospital\HospitalUserService;
 
 class HospitalUsersController extends Controller
 {
     public function __construct(
-        HospitalUserRepository $hospital_users_repository
+        HospitalUserRepository $hospital_users_repository,
+        HospitalUserService $hospital_users_service
     )
     {
         $this->hospital_users = new HospitalUsers();
         $this->hospital_users_indicators = new HospitalUsersIndicators();
         $this->hospital_users_repository = $hospital_users_repository;
+        $this->hospital_users_service = $hospital_users_service;
         $this->payload = auth('hospital_api')->user();
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
@@ -29,12 +32,12 @@ class HospitalUsersController extends Controller
     {
         $where = [["hospital_users.hospital_id", $this->hospital_id]];
 
-        $data_count = $this->hospital_users->where($where)->count();
-
         $request_data = $request->all();
 
         $where[] = ['hospital_users.status',$request_data['status']];
 
+        $data_count = $this->hospital_users->where($where)->count();
+        
         //Filter option
         if(isset($request_data['search_string']) && $request_data['search_string'] != "")
         {
@@ -544,6 +547,26 @@ class HospitalUsersController extends Controller
 
 
         return json_encode($return);
+    }
+
+    public function uploadList(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'excel_data' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $errors_message = "";
+            $errors = $validator->errors()->all();
+            foreach ($errors as $key => $value) {
+                $errors_message .= $value . "\n";
+            }
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
+        } else {
+            $return = $this->hospital_users_service->uploadUserList($request->all());
+            
+        }
+        return $this->response($return);
     }
 
 }
