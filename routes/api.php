@@ -156,6 +156,8 @@ Route::group(['middleware' => ['Cors']], function () {
             });
 
 	        Route::post('patient/list/upload', 'HospitalPatientController@uploadPatientList')->name("upload_key-hospital_patient_upload_list");
+	        Route::post('doctor/list/upload', 'DoctorsController@uploadList')->name("upload_key-hospital_doctor_upload_list");
+	        Route::post('user/list/upload', 'HospitalUsersController@uploadList')->name("upload_key-hospital_user_upload_list");
 
 
             Route::get('users/profile-data', 'HospitalUsersController@getInfo');

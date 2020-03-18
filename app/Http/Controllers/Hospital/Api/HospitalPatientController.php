@@ -20,8 +20,8 @@ class HospitalPatientController extends Controller
         $this->hospital_id = $this->payload['hospital_id'];
         $this->hospital_user_id = $this->payload['hospital_user_id'];
         $this->hospital_patient_service = $hospital_patient_service;
-        // $this->hospital_id = 1;
-        // $this->hospital_user_id = 1;
+        $this->hospital_id = 1;
+        $this->hospital_user_id = 1;
     }
 
 
@@ -292,13 +292,13 @@ class HospitalPatientController extends Controller
             }
 
         }
-        return json_encode($return);
+        return $this->response($return);
     }
 
     public function uploadPatientList(Request $request)
     {
-        $validator = \Validator::make($request->file(), [
-            'file_data' => 'required|mimes:csv,xls',
+        $validator = \Validator::make($request->all(), [
+            'excel_data' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -307,12 +307,12 @@ class HospitalPatientController extends Controller
             foreach ($errors as $key => $value) {
                 $errors_message .= $value . "\n";
             }
-            $return = array("success" => false, "error_code" => 1, "info" => $errors_message,"data" => $request->file('file_data'));
+            $return = array("success" => false, "error_code" => 1, "info" => $errors_message);
         } else {
             $return = $this->hospital_patient_service->uploadPatientList($request->all());
             
         }
-        return json_encode($return);
+        return $this->response($return);
     }
 
 }

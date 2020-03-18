@@ -22,8 +22,8 @@ class HospitalPatientService
     {
         $validator = \Validator::make($request_data, [
             'patient_name' => 'required',
-            'email' => 'required|email',
-            'mobile' => 'required|numeric',
+            'email' => 'required|email|unique:hospital_patient_table,email',
+            'mobile' => 'required|numeric|unique:hospital_patient_table,mobile',
             'pid' => 'required',
             'sex' => 'required',
             'city' => 'required',
@@ -92,32 +92,43 @@ class HospitalPatientService
     public function uploadPatientList($request_data = [])
     {
         $required_headings = ["patient_name","pid","sex","email","mobile","dob","state","city","address"];
+        $heading_data = $required_headings;
         //This code for getting excel data
-        $path = $request_data['file_data']->getRealPath();
+        $excel_data = $request_data['excel_data'];
         
-        $excel_data = $this->common_service->readExcel($path);
-        $heading_data = $excel_data->getHeading();
-        if($required_headings === $heading_data)
+        if(count($excel_data) > 0)
         {
-            if(count($excel_data) > 0)
+            //This for creating headings
+            foreach ($excel_data[0] as &$index_value) {
+                $index_value = str_replace(" ","_",strtolower($index_value));
+            }
+            
+            if(empty(array_diff($required_headings,$excel_data[0])))
             {
                 $success = 1;
                 $insert_bulk_data = [];
-                foreach ($excel_data as $key => &$value) {
-                    $insert_data = $value->toArray();
-                    $return = $this->validatePatient($value->toArray());
+                $heading_data[] = "error";
+                $error_data[] = $heading_data;
+                unset($excel_data[0]);
+
+                foreach ($excel_data as $key => $value) {
+                    
+                    $insert_data=array_combine($required_headings,$value);
+                    $return = $this->validatePatient($insert_data);
                     if(!$return['success'])
                     {
-                        $value['error'] = $return['info'];
+                        $value[] = $return['info'];
+                        $error_data[] = $value;
                         $success = 0;
                     }else{
                         $insert_data['hospital_id'] = $this->hospital_id;
-                        $insert_data['patient_reference_number'] = date("his");
+                        $insert_data['patient_reference_number'] = date("dmyHis").$key;
+                        $insert_data['dob'] = date("Y-m-d",strtotime($insert_data['dob']));
                         $insert_bulk_data[] = $insert_data;
                     }
                     
                 }
-                
+               
                 if($success)
                 {
                     $response = $this->hospital_patient_repository->insert($insert_bulk_data);
@@ -127,17 +138,18 @@ class HospitalPatientService
                         $return = array(
                             "success" => false,
                             "error_code" => 1,
-                            "info" => "Something is wrong, please try again."
+                            "info" => "Something is wrong, please try again.",
+                            "data" => $insert_bulk_data
                         );
                     }
                 } else {
-                    $return = array("success" => false, "error_code" => 2, "info" => "Error found in data.", "data" => ["error_data" => $excel_data]);
+                    $return = array("success" => false, "error_code" => 2, "info" => "Error found in data.", "data" => ["error_data" => $error_data]);
                 }
             }else{
-                $return = array("success" => false, "error_code" => 1, "info" => "No data Found.");
+                $return = array("success" => false, "error_code" => 1, "info" => "Invalid data present in excel.");
             }
         } else {
-            $return = array("success" => false, "error_code" => 1, "info" => "Invalid column is added");
+            $return = array("success" => false, "error_code" => 1, "info" => "No data present in excel.");
         }
         return $return;
     }
